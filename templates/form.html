@@ -1,10 +1,8 @@
-<!-- templates/form.html -->
 <!DOCTYPE html>
-<html>
+<html lang="de">
   <head>
     <title>Person Form</title>
     <link rel="stylesheet" href="/static/css/style.css" />
-    <script src="{{ url_for('static_files', path='scripts/Form-Person.js') }}"></script>
   </head>
   <body>
     <div class="wrapper">
@@ -35,7 +33,12 @@
             </div>
             <div class="house-number address">
               <label for="house_number">Hausnummer:</label>
-              <input type="text" name="house_number" id="house_number" required />
+              <input
+                type="text"
+                name="house_number"
+                id="house_number"
+                required
+              />
             </div>
           </div>
 
@@ -58,5 +61,6 @@
         <button type="submit" id="submitBtn" disabled>Weiter</button>
       </form>
     </div>
+    <script src="{{ url_for('static_files', path='scripts/Form-Person.js') }}"></script>
   </body>
 </html>
