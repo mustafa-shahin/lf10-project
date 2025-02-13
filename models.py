@@ -16,24 +16,35 @@ class Person(Base):
     country = Column(String, nullable=False)
     person_type = Column(String, default="customer")
 
-    # One-to-one relationship: one Application per Person.
-    application = relationship(
+    # ONE Person -> MANY Applications
+    applications = relationship(
         "Application",
         back_populates="person",
-        uselist=False,
+        cascade="all, delete-orphan"
+    )
+
+    # ONE Person -> MANY Files
+    files = relationship(
+        "File",
+        back_populates="person",
         cascade="all, delete-orphan"
     )
 
 class Application(Base):
     __tablename__ = "applications"
     id = Column(Integer, primary_key=True, index=True)
-    person_id = Column(Integer, ForeignKey("person.id"), nullable=False, unique=True)
+    # Drop unique=True, since one person can now have multiple applications
+    person_id = Column(Integer, ForeignKey("person.id"), nullable=False)
+
     loan_type = Column(String, nullable=False)
     loan_subtype = Column(String, nullable=False)
     requested_amount = Column(Integer, nullable=False)
     term_in_years = Column(Integer, nullable=False)
 
-    person = relationship("Person", back_populates="application")
+    # MANY Applications -> ONE Person
+    person = relationship("Person", back_populates="applications")
+
+    # ONE Application -> MANY Files
     files = relationship(
         "File",
         back_populates="application",
@@ -50,4 +61,8 @@ class File(Base):
     application_id = Column(Integer, ForeignKey("applications.id"), nullable=False)
     person_id = Column(Integer, ForeignKey("person.id"), nullable=False)
 
+    # MANY Files -> ONE Application
     application = relationship("Application", back_populates="files")
+
+    # MANY Files -> ONE Person
+    person = relationship("Person", back_populates="files")
