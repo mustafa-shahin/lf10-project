@@ -1,0 +1,101 @@
+<!-- templates/loan.html -->
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Darlehensformular</title>
+    <link rel="stylesheet" href="/static/css/style.css" />
+    <script>
+      function onLoanTypeChange() {
+        const loanType = document.getElementById("loan_type").value;
+        const subTypeSelect = document.getElementById("loan_subtype");
+        const repayAmountGroup = document.getElementById("repayAmountGroup");
+        const termGroup = document.getElementById("termGroup");
+
+        // Felder zurücksetzen
+        repayAmountGroup.style.display = "none";
+        termGroup.style.display = "none";
+        subTypeSelect.innerHTML = "";
+
+        if (loanType === "immediate") {
+          // Mögliche Untertypen: Tilgung, Endfälliges Darlehen, Annuität
+          const immediateOptions = ["tilgung", "endfaellig", "annuitaet"];
+          immediateOptions.forEach(opt => {
+            const optionEl = document.createElement("option");
+            optionEl.value = opt;
+            optionEl.text = opt[0].toUpperCase() + opt.slice(1);
+            subTypeSelect.appendChild(optionEl);
+          });
+        } else if (loanType === "building") {
+          // Nur Annuität für Baufinanzierung
+          const optionEl = document.createElement("option");
+          optionEl.value = "annuitaet";
+          optionEl.text = "Annuität";
+          subTypeSelect.appendChild(optionEl);
+        }
+        onSubTypeChange();
+      }
+
+      function onSubTypeChange() {
+        const loanType = document.getElementById("loan_type").value;
+        const subType = document.getElementById("loan_subtype").value;
+        const repayAmountGroup = document.getElementById("repayAmountGroup");
+        const termGroup = document.getElementById("termGroup");
+
+        // Beide Felder zunächst ausblenden
+        repayAmountGroup.style.display = "none";
+        termGroup.style.display = "none";
+
+        if (loanType === "immediate") {
+          if (subType === "tilgung") {
+            // Rückzahlungsbetrag anzeigen
+            repayAmountGroup.style.display = "block";
+          } else {
+            // Endfällig oder Annuität => Laufzeit anzeigen
+            termGroup.style.display = "block";
+          }
+        } else if (loanType === "building") {
+          // Nur Annuität => Laufzeit anzeigen
+          termGroup.style.display = "block";
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <div class="wrapper">
+      <h1>Darlehensantrag</h1>
+      <form action="/loan_submit" method="POST">
+        <label for="loan_type">Art des Darlehens:</label>
+        <select id="loan_type" name="loan_type" required onchange="onLoanTypeChange()">
+          <option value="">-- Bitte auswählen --</option>
+          <option value="immediate">Sofortdarlehen</option>
+          <option value="building">Baufinanzierung</option>
+        </select>
+
+        <label for="loan_subtype">Untertyp:</label>
+        <select id="loan_subtype" name="loan_subtype" required onchange="onSubTypeChange()">
+          <!-- Optionen werden dynamisch von onLoanTypeChange() hinzugefügt -->
+        </select>
+
+        <div>
+          <label for="requested_amount">Gewünschter Darlehensbetrag (€):</label>
+          <input type="number" id="requested_amount" name="requested_amount" min="1" required />
+        </div>
+
+        <div id="repayAmountGroup" style="display:none;">
+          <label for="repayment_amount">Rückzahlungsbetrag (€/Monat):</label>
+          <input type="number" id="repayment_amount" name="repayment_amount" min="1" />
+        </div>
+
+        <div id="termGroup" style="display:none;">
+          <label for="term_in_years">Laufzeit (Jahre):</label>
+          <input type="number" id="term_in_years" name="term_in_years" min="1" />
+        </div>
+
+        <!-- Zur Identifikation des Nutzers im Speicher -->
+        <input type="hidden" name="person_identifier" value="{{ person_identifier }}"/>
+
+        <button type="submit">Darlehen beantragen</button>
+      </form>
+    </div>
+  </body>
+</html>

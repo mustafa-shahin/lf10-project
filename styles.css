@@ -1,0 +1,30 @@
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    color: #333;
+    background-color: #fff;
+    transition: all 0.3s ease;
+}
+
+h1, h2 {
+    color: #444; /* Default heading color */
+    transition: color 0.3s ease;
+}
+
+button {
+    padding: 10px 20px;
+    margin: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    border: none;
+    border-radius: 5px;
+}
+
+.settings button, .settings label, .settings input[type="color"] {
+    margin: 5px;
+    display: inline-block;
+}
+
+.large-text {
+    font-size: 2em;
+}

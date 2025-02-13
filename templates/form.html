@@ -1,0 +1,62 @@
+<!-- templates/form.html -->
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Person Form</title>
+    <link rel="stylesheet" href="/static/css/style.css" />
+    <script src="{{ url_for('static_files', path='scripts/Form-Person.js') }}"></script>
+  </head>
+  <body>
+    <div class="wrapper">
+      <h1>Person Details</h1>
+      <form method="post" action="/submit_person" novalidate>
+        <label for="salutation">Anrede:</label>
+        <select name="salutation" id="salutation" required>
+          <option value="">-- bitte wählen --</option>
+          <option value="Herr">Herr</option>
+          <option value="Frau">Frau</option>
+          <option value="Diverse">Diverse</option>
+        </select>
+
+        <label for="title">Title:</label>
+        <input type="text" name="title" id="title" />
+
+        <label for="first_name">Vorname:</label>
+        <input type="text" name="first_name" id="first_name" required />
+
+        <label for="second_name">Nachname:</label>
+        <input type="text" name="second_name" id="second_name" required />
+
+        <div class="form-address">
+          <div class="street-house-number">
+            <div class="street address">
+              <label for="street">Straße:</label>
+              <input type="text" name="street" id="street" required />
+            </div>
+            <div class="house-number address">
+              <label for="house_number">Hausnummer:</label>
+              <input type="text" name="house_number" id="house_number" required />
+            </div>
+          </div>
+
+          <div class="zip-city">
+            <div class="zip address">
+              <label for="zip_code">PLZ:</label>
+              <input type="text" name="zip_code" id="zip_code" required />
+            </div>
+            <div class="city address">
+              <label for="city">Stadt:</label>
+              <input type="text" name="city" id="city" required />
+            </div>
+          </div>
+
+          <div class="country address">
+            <label for="country">Land:</label>
+            <input type="text" name="country" id="country" required />
+          </div>
+        </div>
+        <button type="submit" id="submitBtn" disabled>Weiter</button>
+      </form>
+    </div>
+  </body>
+</html>

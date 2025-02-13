@@ -1,0 +1,48 @@
+<!-- templates/upload.html -->
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Dateien Hochladen</title>
+    <link rel="stylesheet" href="/static/css/style.css" />
+  </head>
+  <body>
+    <div class="wrapper">
+      <h1>Dateien Hochladen</h1>
+      <form id="uploadForm" method="post" action="/upload_temp" enctype="multipart/form-data">
+        <!-- Hidden input used by JavaScript to identify user -->
+        <input type="hidden" name="person_identifier" value="{{ person_identifier }}">
+
+        <label for="files" class="custom-file-upload btn">
+          Datei auswählen (Bilder oder PDFs)
+        </label>
+        <input 
+          type="file" 
+          id="files" 
+          name="files" 
+          multiple 
+          required 
+          class="hidden-file-input" 
+        />
+        <ul id="selectedFiles"></ul>
+
+        <button class="btn" type="submit">Hochladen</button>
+      </form>
+
+      <h2>Dateien</h2>
+      <ul id="fileList">
+        {% if temp_files %}
+          {% for file_info in temp_files %}
+            <li>{{ file_info.file_name }}</li>
+          {% endfor %}
+        {% else %}
+          <p id="noFiles">Keine Datei wurde Hochgeladen.</p>
+        {% endif %}
+      </ul>
+
+      <!-- Change the old 'nextBtn' to 'finalizeBtn' so we don't get null element -->
+      <button class="btn" id="finalizeBtn">Weiter</button>
+    </div>
+
+    <script src="{{ url_for('static_files', path='scripts/Upload-Template.js') }}"></script>
+  </body>
+</html>
