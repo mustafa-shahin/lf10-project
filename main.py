@@ -69,17 +69,61 @@ def submit_person(
     )
 
 # -------------------------------------------------------------------------
-# 2) Loan Form & Logic
+# 2) Loan Form & Validation Helpers
 # -------------------------------------------------------------------------
+
+def validate_immediate_loan(
+    loan_subtype: str,
+    requested_amount: int,
+    repayment_amount: int,
+    term_in_years: int
+) -> int:
+    #Validierung eines Sofortkredits; gibt die endgültige Laufzeit zurück, wenn gültig,
+    if requested_amount > 40000:
+        raise ValueError("Bei Sofortkrediten darf der angefragte Betrag 40.000 € nicht überschreiten.")
+
+    if loan_subtype == "tilgung":
+        if repayment_amount <= 0:
+            raise ValueError("Bitte geben Sie eine gültige Tilgungshöhe an.")
+        calculated_term = requested_amount / repayment_amount
+        if calculated_term > 5:
+            raise ValueError("Die Laufzeit für ein Tilgungsdarlehen darf 5 Jahre nicht überschreiten.")
+        return int(calculated_term)
+    else:
+        if term_in_years <= 0:
+            raise ValueError("Bitte geben Sie eine gültige Laufzeit ein.")
+        return term_in_years
+
+def validate_building_loan(
+    loan_subtype: str,
+    term_in_years: int
+) -> int:
+    """
+    Validate a building loan; return the final term if valid,
+    otherwise raise ValueError.
+    """
+    if loan_subtype != "annuitaet":
+        raise ValueError("Bei Baufinanzierungen ist ausschließlich ein Annuitätendarlehen möglich.")
+    if term_in_years <= 0:
+        raise ValueError("Bitte geben Sie eine gültige Laufzeit ein.")
+    if term_in_years > 20:
+        raise ValueError("Die Laufzeit für eine Baufinanzierung darf 20 Jahre nicht überschreiten.")
+    return term_in_years
+
+
 @app.get("/loan", response_class=HTMLResponse)
 def get_loan_form(request: Request, person_identifier: str):
     """Show loan.html"""
     if person_identifier not in temp_data:
         raise HTTPException(status_code=404, detail="Session not found.")
-    return templates.TemplateResponse("loan.html", {
-        "request": request,
-        "person_identifier": person_identifier
-    })
+
+    return templates.TemplateResponse(
+        "loan.html",
+        {
+            "request": request,
+            "person_identifier": person_identifier
+        }
+    )
 
 @app.post("/loan_submit", response_class=HTMLResponse)
 def loan_submit(
@@ -91,20 +135,13 @@ def loan_submit(
     term_in_years: int = Form(0),
     person_identifier: str = Form(...),
 ):
-    """Perform loan validation, reject if invalid, otherwise proceed."""
-    if person_identifier not in temp_data:
-        raise HTTPException(status_code=404, detail="Session not found.")
+    #Darlehensvalidierung durchführen, bei Ungültigkeit ablehnen, sonst weiter zur Upload-Seite.
 
-    # Save loan data
-    temp_data[person_identifier]["loan_data"] = {
-        "loan_type": loan_type,
-        "loan_subtype": loan_subtype,
-        "requested_amount": requested_amount,
-        "repayment_amount": repayment_amount,
-        "user_term": term_in_years
-    }
+    if person_identifier not in temp_data:
+        raise HTTPException(status_code=404, detail=SESSION_NOT_FOUND)
 
     def reject(reason: str):
+        """Helper function to show rejection page with reason."""
         return templates.TemplateResponse(
             "upload_success.html",
             {
@@ -114,14 +151,40 @@ def loan_submit(
             }
         )
 
-    if loan_type == "immediate" and requested_amount > 40000:
-        return reject("Der Kredit übersteigt den Höchstbetrag (40.000) für Sofortkredite..")
+    # Prepare loan data
+    loan_data = {
+        "loan_type": loan_type,
+        "loan_subtype": loan_subtype,
+        "requested_amount": requested_amount,
+        "repayment_amount": repayment_amount,
+        "user_term": term_in_years,
+    }
 
-    final_term = term_in_years if term_in_years > 0 else 1  # Ensures non-null
-    if loan_type == "building" and final_term > 20:
-        return reject("Building loan term exceeds 20 years.")
+    # Validate
+    try:
+        if loan_type == "immediate":
+            final_term = validate_immediate_loan(
+                loan_subtype,
+                requested_amount,
+                repayment_amount,
+                term_in_years
+            )
+        elif loan_type == "building":
+            final_term = validate_building_loan(
+                loan_subtype,
+                term_in_years
+            )
+        else:
+            raise ValueError("Ungültige Darlehensart.")
 
-    temp_data[person_identifier]["loan_data"]["final_term"] = final_term
+    except ValueError as e:
+        # If validation fails, show rejection page
+        return reject(str(e))
+
+    # If validation passed, store final term
+    loan_data["final_term"] = final_term
+    temp_data[person_identifier]["loan_data"] = loan_data
+
     return RedirectResponse(
         url=f"/upload?person_identifier={person_identifier}",
         status_code=303
@@ -134,7 +197,8 @@ def loan_submit(
 def get_upload(request: Request, person_identifier: str):
     """Show file upload page."""
     if person_identifier not in temp_data:
-        raise HTTPException(status_code=404, detail="Session not found.")
+        raise HTTPException(status_code=404, detail=SESSION_NOT_FOUND)
+
     return templates.TemplateResponse(
         "upload.html",
         {
@@ -152,7 +216,7 @@ async def upload_temp(
 ):
     """Store files temporarily before DB commit."""
     if person_identifier not in temp_data:
-        raise HTTPException(status_code=404, detail="Session not found.")
+        raise HTTPException(status_code=404, detail=SESSION_NOT_FOUND)
 
     new_files = []
     for upload in files:
@@ -172,7 +236,7 @@ async def upload_temp(
 def delete_file(file_id: str, person_identifier: str = Query(...)):
     """Delete a file from memory."""
     if person_identifier not in temp_data:
-        raise HTTPException(status_code=404, detail="Session not found.")
+        raise HTTPException(status_code=404, detail=SESSION_NOT_FOUND)
 
     files_list = temp_data[person_identifier]["files"]
     for i, f in enumerate(files_list):
@@ -187,31 +251,32 @@ def delete_file(file_id: str, person_identifier: str = Query(...)):
 # -------------------------------------------------------------------------
 @app.get("/create_db_records", response_class=HTMLResponse)
 def create_db_records(request: Request, person_identifier: str):
-    """Save Person, Application, and Files to DB."""
     if person_identifier not in temp_data:
-        raise HTTPException(status_code=404, detail="Session not found.")
+        raise HTTPException(status_code=404, detail=SESSION_NOT_FOUND)
 
     init_db()
     db = SessionLocal()
     try:
-        # 1) Create Person
+        #Create Person
         person_data = temp_data[person_identifier]["person_data"]
         new_person = Person(**person_data)
         db.add(new_person)
         db.flush()  # get new_person.id
 
+        #Create Application
         loan_data = temp_data[person_identifier]["loan_data"]
         new_app = Application(
             person_id=new_person.id,
             loan_type=loan_data["loan_type"],
             loan_subtype=loan_data["loan_subtype"],
             requested_amount=loan_data["requested_amount"],
-            term_in_years=loan_data["final_term"]
+            term_in_years=loan_data["final_term"],
+            repayment_amount=loan_data["repayment_amount"]
         )
         db.add(new_app)
         db.flush()  # get new_app.id
 
-        # 3) Store Files, linking them to the new Application
+        #Store Files and linking them to the new Application & Person
         for f in temp_data[person_identifier]["files"]:
             new_file = FileModel(
                 file_name=f["file_name"],
@@ -223,6 +288,7 @@ def create_db_records(request: Request, person_identifier: str):
             db.add(new_file)
 
         db.commit()
+
     finally:
         db.close()
 

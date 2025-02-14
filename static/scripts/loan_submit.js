@@ -35,6 +35,7 @@ function onSubTypeChange() {
   const subType = document.getElementById("loan_subtype").value;
   const repayAmountGroup = document.getElementById("repayAmountGroup");
   const termGroup = document.getElementById("termGroup");
+  const termInput = document.getElementById("term_in_years");
 
   const shouldShowRepayAmount =
     loanType === "immediate" && subType === "tilgung";
@@ -44,4 +45,7 @@ function onSubTypeChange() {
 
   repayAmountGroup.style.display = shouldShowRepayAmount ? "flex" : "none";
   termGroup.style.display = shouldShowTerm ? "flex" : "none";
+
+  termInput.disabled = shouldShowRepayAmount;
+  if (shouldShowRepayAmount) termInput.value = "";
 }

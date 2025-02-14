@@ -33,13 +33,13 @@ class Person(Base):
 class Application(Base):
     __tablename__ = "applications"
     id = Column(Integer, primary_key=True, index=True)
-    # Drop unique=True, since one person can now have multiple applications
     person_id = Column(Integer, ForeignKey("person.id"), nullable=False)
 
     loan_type = Column(String, nullable=False)
     loan_subtype = Column(String, nullable=False)
     requested_amount = Column(Integer, nullable=False)
     term_in_years = Column(Integer, nullable=False)
+    repayment_amount = Column(Integer, nullable=True)
 
     # MANY Applications -> ONE Person
     person = relationship("Person", back_populates="applications")
@@ -50,6 +50,7 @@ class Application(Base):
         back_populates="application",
         cascade="all, delete-orphan"
     )
+
 
 class File(Base):
     __tablename__ = "files"
