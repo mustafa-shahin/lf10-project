@@ -1,15 +1,17 @@
-  document.getElementById("files").addEventListener("change", function(event) {
-    const selectedFilesContainer = document.getElementById("selectedFiles");
-    selectedFilesContainer.innerHTML = "";
-    const files = event.target.files;
-    for (let i = 0; i < files.length; i++) {
-      const li = document.createElement("li");
-      li.textContent = files[i].name;
-      selectedFilesContainer.appendChild(li);
-    }
-  });
+document.getElementById("files").addEventListener("change", function (event) {
+  const selectedFilesContainer = document.getElementById("selectedFiles");
+  selectedFilesContainer.innerHTML = "";
+  const files = event.target.files;
+  for (const file of files) {
+    const li = document.createElement("li");
+    li.textContent = file.name;
+    selectedFilesContainer.appendChild(li);
+  }
+});
 
-  document.getElementById("uploadForm").addEventListener("submit", async function(event) {
+document
+  .getElementById("uploadForm")
+  .addEventListener("submit", async function (event) {
     event.preventDefault();
     const form = event.target;
     const formData = new FormData(form);
@@ -29,7 +31,7 @@
       if (noFilesMsg) {
         noFilesMsg.remove();
       }
-      data.files.forEach(file => {
+      data.files.forEach((file) => {
         const li = document.createElement("li");
         li.id = "file-" + file.id;
         li.innerHTML = `<div class="flex flex-center flex-space-between"><a href="${file.download_url}" target="_blank">${file.file_name}</a>
@@ -44,14 +46,21 @@
     }
   });
 
-  document.getElementById("fileList").addEventListener("click", async function(event) {
-    if (event.target && event.target.matches(".delete-btn")) {
+document
+  .getElementById("fileList")
+  .addEventListener("click", async function (event) {
+    if (event.target?.matches(".delete-btn")) {
       const fileId = event.target.getAttribute("data-file-id");
       try {
-        const personId = document.querySelector('input[name="person_identifier"]').value;
-        const response = await fetch(`/file/${fileId}?person_identifier=${personId}`, {
-          method: "DELETE",
-        });
+        const personId = document.querySelector(
+          'input[name="person_identifier"]'
+        ).value;
+        const response = await fetch(
+          `/file/${fileId}?person_identifier=${personId}`,
+          {
+            method: "DELETE",
+          }
+        );
         if (!response.ok) {
           const errorData = await response.json();
           alert("Error: " + errorData.detail);
@@ -74,8 +83,9 @@
     }
   });
 
-  document.getElementById("finalizeBtn").addEventListener("click", function() {
-    const personId = document.querySelector('input[name="person_identifier"]').value;
-    window.location.href = `/create_db_records?person_identifier=${personId}`;
-  });
-
+document.getElementById("finalizeBtn").addEventListener("click", function () {
+  const personId = document.querySelector(
+    'input[name="person_identifier"]'
+  ).value;
+  window.location.href = `/create_db_records?person_identifier=${personId}`;
+});
