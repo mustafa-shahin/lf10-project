@@ -30,12 +30,10 @@ templates = Jinja2Templates(directory="templates")
 # -------------------------------------------------------------------------
 @app.get("/", response_class=HTMLResponse)
 def read_form(request: Request):
-    """Display form.html for Person data."""
     return templates.TemplateResponse("form.html", {"request": request})
 
 @app.post("/submit_person", response_class=HTMLResponse)
 def submit_person(
-    request: Request,
     salutation: str = Form(...),
     title: str = Form(None),
     first_name: str = Form(...),
@@ -98,10 +96,6 @@ def validate_building_loan(
     loan_subtype: str,
     term_in_years: int
 ) -> int:
-    """
-    Validate a building loan; return the final term if valid,
-    otherwise raise ValueError.
-    """
     if loan_subtype != "annuitaet":
         raise ValueError("Bei Baufinanzierungen ist ausschließlich ein Annuitätendarlehen möglich.")
     if term_in_years <= 0:
@@ -113,7 +107,6 @@ def validate_building_loan(
 
 @app.get("/loan", response_class=HTMLResponse)
 def get_loan_form(request: Request, person_identifier: str):
-    """Show loan.html"""
     if person_identifier not in temp_data:
         raise HTTPException(status_code=404, detail="Session not found.")
 
@@ -136,9 +129,8 @@ def loan_submit(
     person_identifier: str = Form(...),
 ):
     #Darlehensvalidierung durchführen, bei Ungültigkeit ablehnen, sonst weiter zur Upload-Seite.
-
     if person_identifier not in temp_data:
-        raise HTTPException(status_code=404, detail=SESSION_NOT_FOUND)
+        raise HTTPException(status_code=404, detail="Session not found.")
 
     def reject(reason: str):
         """Helper function to show rejection page with reason."""
@@ -197,7 +189,7 @@ def loan_submit(
 def get_upload(request: Request, person_identifier: str):
     """Show file upload page."""
     if person_identifier not in temp_data:
-        raise HTTPException(status_code=404, detail=SESSION_NOT_FOUND)
+        raise HTTPException(status_code=404, detail="Session not found.")
 
     return templates.TemplateResponse(
         "upload.html",
@@ -210,13 +202,12 @@ def get_upload(request: Request, person_identifier: str):
 
 @app.post("/upload_temp")
 async def upload_temp(
-    request: Request,
     person_identifier: str = Form(...),
     files: List[UploadFile] = FastAPIFile(...),
 ):
     """Store files temporarily before DB commit."""
     if person_identifier not in temp_data:
-        raise HTTPException(status_code=404, detail=SESSION_NOT_FOUND)
+        raise HTTPException(status_code=404, detail="Session not found.")
 
     new_files = []
     for upload in files:
@@ -236,7 +227,7 @@ async def upload_temp(
 def delete_file(file_id: str, person_identifier: str = Query(...)):
     """Delete a file from memory."""
     if person_identifier not in temp_data:
-        raise HTTPException(status_code=404, detail=SESSION_NOT_FOUND)
+        raise HTTPException(status_code=404, detail="Session not found.")
 
     files_list = temp_data[person_identifier]["files"]
     for i, f in enumerate(files_list):
@@ -252,7 +243,7 @@ def delete_file(file_id: str, person_identifier: str = Query(...)):
 @app.get("/create_db_records", response_class=HTMLResponse)
 def create_db_records(request: Request, person_identifier: str):
     if person_identifier not in temp_data:
-        raise HTTPException(status_code=404, detail=SESSION_NOT_FOUND)
+        raise HTTPException(status_code=404, detail="Session not found.")
 
     init_db()
     db = SessionLocal()
