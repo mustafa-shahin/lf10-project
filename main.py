@@ -21,7 +21,7 @@ app = FastAPI()
 def compile_scss():
     if os.path.exists("static/scss"):
         sass.compile(dirname=("static/scss", "static/css"), output_style="compressed")
-
+init_db()
 app.mount("/static", StaticFiles(directory="static"), name="static_files")
 templates = Jinja2Templates(directory="templates")
 
@@ -44,7 +44,7 @@ def submit_person(
     city: str = Form(...),
     country: str = Form(...),
 ):
-    """Store person data in memory and redirect to loan page."""
+    #store person data in memory and redirect to loan page
     person_identifier = str(uuid.uuid4())
     temp_data[person_identifier] = {
         "person_data": {
@@ -133,7 +133,7 @@ def loan_submit(
         raise HTTPException(status_code=404, detail="Session not found.")
 
     def reject(reason: str):
-        """Helper function to show rejection page with reason."""
+        #helper function to show rejection page with reason.
         return templates.TemplateResponse(
             "upload_success.html",
             {
@@ -187,7 +187,7 @@ def loan_submit(
 # -------------------------------------------------------------------------
 @app.get("/upload", response_class=HTMLResponse)
 def get_upload(request: Request, person_identifier: str):
-    """Show file upload page."""
+    #show file upload page.
     if person_identifier not in temp_data:
         raise HTTPException(status_code=404, detail="Session not found.")
 
@@ -205,7 +205,7 @@ async def upload_temp(
     person_identifier: str = Form(...),
     files: List[UploadFile] = FastAPIFile(...),
 ):
-    """Store files temporarily before DB commit."""
+    #store files temporarily before DB commit.
     if person_identifier not in temp_data:
         raise HTTPException(status_code=404, detail="Session not found.")
 
@@ -225,7 +225,7 @@ async def upload_temp(
 
 @app.delete("/file/{file_id}")
 def delete_file(file_id: str, person_identifier: str = Query(...)):
-    """Delete a file from memory."""
+#Delete a file from memory
     if person_identifier not in temp_data:
         raise HTTPException(status_code=404, detail="Session not found.")
 
@@ -245,16 +245,21 @@ def create_db_records(request: Request, person_identifier: str):
     if person_identifier not in temp_data:
         raise HTTPException(status_code=404, detail="Session not found.")
 
-    init_db()
     db = SessionLocal()
     try:
-        #Create Person
+        # Retrieve person data from temp storage
         person_data = temp_data[person_identifier]["person_data"]
-        new_person = Person(**person_data)
-        db.add(new_person)
-        db.flush()  # get new_person.id
 
-        #Create Application
+        # 1) Check if the person already exists
+        existing_person = db.query(Person).filter_by(**person_data).first()
+        if existing_person:
+            new_person = existing_person
+        else:
+            new_person = Person(**person_data)
+            db.add(new_person)
+            db.flush()  #new_person.id
+
+        # 2) Create a new Application
         loan_data = temp_data[person_identifier]["loan_data"]
         new_app = Application(
             person_id=new_person.id,
@@ -267,7 +272,7 @@ def create_db_records(request: Request, person_identifier: str):
         db.add(new_app)
         db.flush()  # get new_app.id
 
-        #Store Files and linking them to the new Application & Person
+        # 3) Store Files, linking to the same Person/Application
         for f in temp_data[person_identifier]["files"]:
             new_file = FileModel(
                 file_name=f["file_name"],
@@ -278,15 +283,16 @@ def create_db_records(request: Request, person_identifier: str):
             )
             db.add(new_file)
 
+        # 4) Commit
         db.commit()
 
     finally:
         db.close()
 
-    # Clear temp data for this user
+    # Remove from temp_data
     del temp_data[person_identifier]
 
-    return templates.TemplateResponse("upload_success.html", {
-        "request": request,
-        "rejected": False
-    })
+    return templates.TemplateResponse(
+        "upload_success.html",
+        {"request": request, "rejected": False}
+    )

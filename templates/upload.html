@@ -1,6 +1,6 @@
 <!-- templates/upload.html -->
 <!DOCTYPE html>
-<html>
+<html lang="de">
   <head>
     <title>Dateien Hochladen</title>
     <link rel="stylesheet" href="/static/css/style.css" />
@@ -8,19 +8,28 @@
   <body>
     <div class="wrapper">
       <h1>Dateien Hochladen</h1>
-      <form id="uploadForm" method="post" action="/upload_temp" enctype="multipart/form-data">
-        <input type="hidden" name="person_identifier" value="{{ person_identifier }}">
+      <form
+        id="uploadForm"
+        method="post"
+        action="/upload_temp"
+        enctype="multipart/form-data"
+      >
+        <input
+          type="hidden"
+          name="person_identifier"
+          value="{{ person_identifier }}"
+        />
 
         <label for="files" class="custom-file-upload btn">
           Datei auswählen (Bilder oder PDFs)
         </label>
-        <input 
-          type="file" 
-          id="files" 
-          name="files" 
-          multiple 
-          required 
-          class="hidden-file-input" 
+        <input
+          type="file"
+          id="files"
+          name="files"
+          multiple
+          required
+          class="hidden-file-input"
         />
         <ul id="selectedFiles"></ul>
 
@@ -29,12 +38,10 @@
 
       <h2>Dateien</h2>
       <ul id="fileList">
-        {% if temp_files %}
-          {% for file_info in temp_files %}
-            <li>{{ file_info.file_name }}</li>
-          {% endfor %}
-        {% else %}
-          <p id="noFiles">Keine Datei wurde Hochgeladen.</p>
+        {% if temp_files %} {% for file_info in temp_files %}
+        <li>{{ file_info.file_name }}</li>
+        {% endfor %} {% else %}
+        <p id="noFiles">Keine Datei wurde Hochgeladen.</p>
         {% endif %}
       </ul>
       <button class="btn" id="finalizeBtn">Weiter</button>

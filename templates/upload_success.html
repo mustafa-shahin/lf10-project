@@ -1,20 +1,22 @@
 <!-- templates/upload_success.html -->
 <!DOCTYPE html>
-<html>
+<html lang="de">
   <head>
-    <title>Loan Decision</title>
+    <title>Entscheidung</title>
     <link rel="stylesheet" href="/static/css/style.css" />
   </head>
   <body>
     <div class="wrapper">
       {% if rejected %}
-        <h2>We’re sorry, but your loan application has been rejected.</h2>
-        {% if rejected_reason %}
-        <p>Reason: {{ rejected_reason }}</p>
-        {% endif %}
-      {% else %}
-        <h1>Loan Accepted and Saved!</h1>
-        <p>Your loan application has been accepted. All data has been saved to the database.</p>
+      <h2>We’re sorry, but your loan application has been rejected.</h2>
+      {% if rejected_reason %}
+      <p>Reason: {{ rejected_reason }}</p>
+      {% endif %} {% else %}
+      <h1>Loan Accepted and Saved!</h1>
+      <p>
+        Your loan application has been accepted. All data has been saved to the
+        database.
+      </p>
       {% endif %}
       <a href="/">Startseite</a>
     </div>
