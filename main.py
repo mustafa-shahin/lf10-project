@@ -84,6 +84,7 @@ def validate_immediate_loan(
         if repayment_amount <= 0:
             raise ValueError("Bitte geben Sie eine gültige Tilgungshöhe an.")
         calculated_term = requested_amount / repayment_amount
+        print(calculated_term)
         if calculated_term > 5:
             raise ValueError("Die Laufzeit für ein Tilgungsdarlehen darf 5 Jahre nicht überschreiten.")
         return int(calculated_term)

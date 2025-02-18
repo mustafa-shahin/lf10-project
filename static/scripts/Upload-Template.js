@@ -61,6 +61,7 @@ document.getElementById("files").addEventListener("change", (event) => {
   for (const file of files) {
     const li = createFileListItem(file);
     selectedFilesContainer.appendChild(li);
+    selectedFilesContainer.classList.remove("hidden");
   }
 });
 

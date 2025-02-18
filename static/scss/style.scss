@@ -103,7 +103,7 @@ form {
 #selectedFiles {
   list-style: none;
   padding: 0;
-  margin-bottom: 1rem;
+  margin: unset;
 }
 #selectedFiles li {
   padding: 0.3rem 0;
@@ -165,4 +165,13 @@ form {
 }
 .margin-0 {
   margin: 0px;
+}
+.hidden {
+  display: none;
+}
+#selectedFiles + button {
+  margin-top: 1rem;
+}
+.custom-file-upload {
+  margin-bottom: 1rem;
 }

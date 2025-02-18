@@ -8,15 +8,11 @@
   <body>
     <div class="wrapper">
       {% if rejected %}
-      <h2>We’re sorry, but your loan application has been rejected.</h2>
+      <h2>Es tut uns leid, aber Ihr Kreditantrag wurde abgelehnt.</h2>
       {% if rejected_reason %}
-      <p>Reason: {{ rejected_reason }}</p>
+      <p>Grund: {{ rejected_reason }}</p>
       {% endif %} {% else %}
-      <h1>Loan Accepted and Saved!</h1>
-      <p>
-        Your loan application has been accepted. All data has been saved to the
-        database.
-      </p>
+      <h2>Ihr Darlehensantrag wurde angenommen und wird bearbeitet.</h2>
       {% endif %}
       <a href="/">Startseite</a>
     </div>
