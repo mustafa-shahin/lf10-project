@@ -1,0 +1,20 @@
+<div class="header">
+   <div class="flex flex-space-between">
+    <div class="logo-container">
+      <a href="/">
+        <img src="/static/images/logo.jpg" alt="Logo" class="logo" />
+    </div>
+    </a>
+    <div class="user flex">
+      {% if user %}
+      <div class="flex user-info">
+        <img src="/static/icons/user.png" alt="User" />
+       <p>{{ user.first_name }}</p>
+      </div>
+      <a class="logout" href="/logout" style="float: right">
+        <img src="/static/icons/logout.png" alt="Logout" />
+      </a>
+      {% endif %}
+    </div>
+   </div>
+</div>

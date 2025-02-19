@@ -1,78 +1,62 @@
-<!DOCTYPE html>
-<html lang="de">
-  <head>
-    <title>Darlehensformular</title>
-    <link rel="stylesheet" href="/static/css/style.css" />
-    <script></script>
-  </head>
-  <body>
-    <div class="wrapper">
-      <h1>Darlehensantrag</h1>
-      <form action="/loan_submit" method="POST" class="loan-form">
-        <label for="loan_type">Art des Darlehens:</label>
-        <select
-          id="loan_type"
-          name="loan_type"
-          required
-          onchange="onLoanTypeChange()"
-        >
-          <option value="">-- Bitte auswählen --</option>
-          <option value="immediate">Sofortdarlehen</option>
-          <option value="building">Baufinanzierung</option>
-        </select>
+{% extends "base.html" %} {% block title %}Darlehensantrag {% endblock %} {%
+block content %}
+<h1>Darlehensantrag</h1>
+<form action="/loan_submit" method="POST" class="loan-form">
+  <label for="loan_type">Art des Darlehens:</label>
+  <select
+    id="loan_type"
+    name="loan_type"
+    required
+    onchange="onLoanTypeChange()"
+  >
+    <option value="">-- Bitte auswählen --</option>
+    <option value="immediate">Sofortdarlehen</option>
+    <option value="building">Baufinanzierung</option>
+  </select>
 
-        <label for="loan_subtype">Untertyp:</label>
-        <select
-          id="loan_subtype"
-          name="loan_subtype"
-          required
-          onchange="onSubTypeChange()"
-        >
-          <!-- Optionen werden dynamisch von onLoanTypeChange() hinzugefügt -->
-        </select>
+  <label for="loan_subtype">Untertyp:</label>
+  <select
+    id="loan_subtype"
+    name="loan_subtype"
+    required
+    onchange="onSubTypeChange()"
+  >
+    <!-- Dynamically added in loan_submit.js -->
+  </select>
 
-        <div class="requested-amount">
-          <label for="requested_amount">Gewünschter Darlehensbetrag (€):</label>
-          <input
-            type="number"
-            id="requested_amount"
-            name="requested_amount"
-            min="1"
-            required
-          />
-        </div>
+  <div class="requested-amount">
+    <label for="requested_amount">Gewünschter Darlehensbetrag (€):</label>
+    <input
+      type="number"
+      id="requested_amount"
+      name="requested_amount"
+      min="1"
+      required
+    />
+  </div>
 
-        <div id="repayAmountGroup" style="display: none">
-          <label for="repayment_amount">Rückzahlungsbetrag (€/Monat):</label>
-          <input
-            type="number"
-            id="repayment_amount"
-            name="repayment_amount"
-            min="1"
-          />
-        </div>
+  <div id="repayAmountGroup" style="display: none">
+    <label for="repayment_amount">Rückzahlungsbetrag (€/Monat):</label>
+    <input
+      type="number"
+      id="repayment_amount"
+      name="repayment_amount"
+      min="1"
+    />
+  </div>
 
-        <div id="termGroup" style="display: none">
-          <label for="term_in_years">Laufzeit (Jahre):</label>
-          <input
-            type="number"
-            id="term_in_years"
-            name="term_in_years"
-            min="1"
-            required
-          />
-        </div>
+  <div id="termGroup" style="display: none">
+    <label for="term_in_years">Laufzeit (Jahre):</label>
+    <input
+      type="number"
+      id="term_in_years"
+      name="term_in_years"
+      min="1"
+      required
+    />
+  </div>
+  <button id="submitBtn" type="submit">Darlehen beantragen</button>
+</form>
+<script src="/static/scripts/loan_submit.js"></script>
 
-        <input
-          type="hidden"
-          name="person_identifier"
-          value="{{ person_identifier }}"
-        />
-
-        <button id="submitBtn" type="submit">Darlehen beantragen</button>
-      </form>
-    </div>
-    <script src="{{ url_for('static_files', path='scripts/loan_submit.js') }}"></script>
-    <script src="{{ url_for('static_files', path='scripts/Form-Person.js') }}"></script>
-  </body>
-</html>
+{% endblock %}

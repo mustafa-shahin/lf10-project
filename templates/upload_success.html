@@ -1,20 +1,10 @@
-<!-- templates/upload_success.html -->
-<!DOCTYPE html>
-<html lang="de">
-  <head>
-    <title>Entscheidung</title>
-    <link rel="stylesheet" href="/static/css/style.css" />
-  </head>
-  <body>
-    <div class="wrapper">
-      {% if rejected %}
-      <h2>Es tut uns leid, aber Ihr Kreditantrag wurde abgelehnt.</h2>
-      {% if rejected_reason %}
-      <p>Grund: {{ rejected_reason }}</p>
-      {% endif %} {% else %}
-      <h2>Ihr Darlehensantrag wurde angenommen und wird bearbeitet.</h2>
-      {% endif %}
-      <a href="/">Startseite</a>
-    </div>
-  </body>
-</html>
+{% extends "base.html" %} {% block title %}Dashboard {% endblock %} {% block
+content %} {% if rejected %}
+<h2>Es tut uns leid, aber Ihr Kreditantrag wurde abgelehnt.</h2>
+{% if rejected_reason %}
+<p>Grund: {{ rejected_reason }}</p>
+{% endif %} {% else %}
+<h2>Ihr Darlehensantrag wurde angenommen und wird bearbeitet.</h2>
+{% endif %}
+<a href="/dashboard">Startseite</a>
+{% endblock %}

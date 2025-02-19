@@ -1,19 +1,17 @@
 $font-stack: "Open Sans", Arial, sans-serif;
 $primary-color: #333;
 $accent-color: #007bff;
-$background-color: #f7f8fa;
+$background-color: #3c3c3c;
 $border-radius: 6px;
+$color: #fff;
 
 body {
-  display: flex;
-  justify-content: center;
-  align-items: center;
   min-height: 100vh;
   margin: 0;
   padding: 0;
   font-family: $font-stack;
   background-color: $background-color;
-  color: $primary-color;
+  color: $color;
 }
 
 .container {
@@ -40,6 +38,9 @@ form {
   }
 
   input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  #password,
   select {
     padding: 0.6rem;
     margin-bottom: 1rem;
@@ -174,4 +175,94 @@ form {
 }
 .custom-file-upload {
   margin-bottom: 1rem;
+}
+.login-register-inputs {
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  padding: 0 14px;
+}
+.login-register-inputs + button {
+  margin-top: 10px;
+}
+
+.first_name,
+.last_name,
+.password,
+.email,
+.zip,
+.city,
+.street,
+.house_number,
+.country {
+  label {
+    display: block;
+  }
+  input {
+    width: 95%;
+  }
+}
+.first_name,
+.last_name {
+  input {
+    width: 88%;
+  }
+}
+
+.logo-container {
+  width: fit-content;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  .logo {
+    max-width: 150px;
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+  }
+}
+.flex.flex-space-between:has(.logo-container) {
+  padding: 15px;
+}
+a.btn {
+  text-decoration: none;
+}
+.logout img {
+  width: 30px;
+  height: 30px;
+}
+.user {
+  align-items: center;
+  align-content: flex-start;
+  flex-wrap: wrap;
+  gap: 18px;
+  position: relative;
+  top: -21px;
+  img {
+    width: 30px;
+    height: 30px;
+  }
+}
+.flex.user-info {
+  flex-direction: column;
+  position: relative;
+  top: 21px;
+  align-content: center;
+  align-items: center;
+}
+.user-management {
+  flex-direction: row;
+  button {
+    left: 65px;
+    position: relative;
+  }
+  select {
+    position: relative;
+    left: 40px;
+  }
+}
+a {
+  color: $color;
+}
+td:has(ul.margin-0) {
+  vertical-align: baseline;
 }

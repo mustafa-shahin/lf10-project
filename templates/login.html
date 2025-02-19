@@ -1,0 +1,30 @@
+{% extends "base.html" %} {% block title %}Login{% endblock %} {% block content
+%}
+<div class="wrapper">
+  <h1>Login</h1>
+
+  {% if error %}
+  <p style="color: red">{{ error }}</p>
+  {% endif %}
+
+  <form method="post" action="/login">
+    <label for="email">Email:</label>
+    <input class="login-register-inputs" type="email" name="email" required />
+
+    <label for="password">Password:</label>
+    <input
+      class="login-register-inputs"
+      type="password"
+      name="password"
+      required
+    />
+
+    <button class="btn" type="submit">Log In</button>
+  </form>
+
+  <p>
+    <a href="/register">Registrierung</a> |
+    <a href="/forgot_password">Passwort vergessen?</a>
+  </p>
+</div>
+{% endblock %}

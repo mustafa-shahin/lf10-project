@@ -1,0 +1,12 @@
+<!-- templates/base.html -->
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <title>{% block title %}{% endblock %}</title>
+    <link rel="stylesheet" href="/static/css/style.css" />
+  </head>
+  <body>
+    {% include "header.html" %}
+    <div class="wrapper">{% block content %} {% endblock %}</div>
+  </body>
+</html>
