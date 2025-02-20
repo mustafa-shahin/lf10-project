@@ -57,6 +57,6 @@ block content %}
   </div>
   <button id="submitBtn" type="submit">Darlehen beantragen</button>
 </form>
-<script src="/static/scripts/loan_submit.js"></script>
-
+<script src="{{ url_for('static_files', path='scripts/Form-Person.js') }}"></script>
+<script src="{{ url_for('static_files', path='scripts/loan_submit.js') }}"></script>
 {% endblock %}

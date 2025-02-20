@@ -1,7 +1,7 @@
 $font-stack: "Open Sans", Arial, sans-serif;
 $primary-color: #333;
 $accent-color: #007bff;
-$background-color: #3c3c3c;
+$background-color: #1d2125;
 $border-radius: 6px;
 $color: #fff;
 
@@ -132,6 +132,9 @@ form {
 }
 .flex-space-between {
   justify-content: space-between;
+}
+.justify-content-center {
+  justify-content: center;
 }
 .flex.flex-center.flex-space-between {
   gap: 10px;
@@ -265,4 +268,41 @@ a {
 }
 td:has(ul.margin-0) {
   vertical-align: baseline;
+}
+.col.flex {
+  flex-direction: column;
+  align-items: center;
+}
+.dashboard-container .flex:not(.col) {
+  border: 1px solid #ccc;
+  padding: 1rem;
+  gap: 34px;
+}
+.col-email {
+  min-width: 220px;
+}
+.full-width {
+  width: 100%;
+}
+.dashboard-container {
+  width: 65%;
+}
+.col-actions.flex {
+  position: relative;
+  left: -63px;
+}
+.admin,
+.rejected {
+  background: #a31e1e;
+}
+.employee,
+.approved {
+  background: #1e5128;
+}
+.customer,
+.in-progress {
+  background: #2d4263;
+}
+.text-center {
+  text-align: center;
 }

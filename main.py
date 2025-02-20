@@ -20,7 +20,11 @@ def on_startup():
     if os.path.exists("static/scss"):
         sass.compile(dirname=("static/scss", "static/css"), output_style="compressed")
     init_db()
-
+app.mount(
+    "/static",
+    StaticFiles(directory="static"),
+    name="static_files"
+)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 

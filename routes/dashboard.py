@@ -70,16 +70,16 @@ def process_loan_decision(
     if not app_obj:
         return RedirectResponse(url="/dashboard", status_code=303)
 
-    if decision == "accept":
+    if decision == "approved":
         app_obj.status = "angenommen"
-    elif decision == "reject":
+    elif decision == "rejected":
         app_obj.status = "abgelehnt"
 
     app_obj.decided_at = datetime.utcnow()
     app_obj.handled_by_id = user.id
     db.commit()
     db.refresh(app_obj)
-    status ="angenommen" if decision == "accept" else "abgelehnt"
+    status ="angenommen" if decision == "approved" else "abgelehnt"
     formatted_date = app_obj.created_at.strftime("%d.%m.%Y")
     # Send email
     person = app_obj.person

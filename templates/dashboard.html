@@ -1,114 +1,122 @@
 {% extends "base.html" %} {% block title %}Dashboard{% endblock %} {% block
 content %}
 
-
-{% if user.person_type == "admin" %}
-  <h1>Benutzer</h1>
+<div class="dashboard-container">
+  {% if user.person_type == "admin" %}
+  <h1 class="text-center">Benutzer</h1>
   {% else %}
-  <h1>Anträge</h1>
-  <table>
-    <tr>
-      <th>Antrag</th>
-      <th>Typ</th>
-      <th>Höhe</th>
-      <th>Term</th>
-      <th>Status</th>
-      <th>Erstelldatum</th>
-      <th>Entscheidungsdatum</th>
-      <th>Dateien</th>
-      {% if user.person_type == "employee" %}
-      <th>Aktionen</th>
-      {% endif %}
-    </tr>
-  
-    {% for app in applications %}
-    <tr>
-      <td>{{ app.loan_type }}</td>
-      <td>{{ app.loan_subtype }}</td>
-      <td>{{ app.requested_amount }}</td>
-      <td>{{ app.term_in_years }}</td>
-      <td>{{ app.status }}</td>
-    <td>
+  <h1 class="text-center">Anträge</h1>
+  {% endif %} {% if user.person_type != "admin" %} {% for app in applications %}
+  <div class="flex flex-space-between full-width {% if app.status == 'angenommen' %}approved{% elif app.status == 'in bearbeitung' %}in-progress{% else %}rejected{% endif %}">
+    <div class="col flex">
+      <p>Antrag:</p>
+      <p>{{ app.loan_type }}</p>
+    </div>
+
+    <div class="col flex">
+      <p>Typ:</p>
+      <p>{{ app.loan_subtype }}</p>
+    </div>
+
+    <div class="col flex">
+      <p>Höhe:</p>
+      <p>{{ app.requested_amount }}</p>
+    </div>
+
+    <div class="col flex">
+      <p>Term:</p>
+      <p>{{ app.term_in_years }}</p>
+    </div>
+
+    <div class="col flex">
+      <p>Status</p>
+      <p>{{ app.status }}</p>
+    </div>
+
+    <div class="col flex">
+      <p>Erstelldatum:</p>
       {% if app.created_at %}
-        {{ app.created_at.strftime("%Y-%m-%d") }}
-      {% endif %}
-    </td>
+      <p>{{ app.created_at.strftime("%Y-%m-%d") }}</p>
 
-    <td>
+      {% endif %}
+    </div>
+
+    <div class="col flex">
+      <p>Entscheidungsdatum:</p>
       {% if app.decided_at %}
-        {{ app.decided_at.strftime("%Y-%m-%d") }}
-
+      <p>{{ app.decided_at.strftime("%Y-%m-%d") }}</p>
       {% endif %}
-    </td>
-      <td>
-        {% if app.files %}
-        <ul class="margin-0">
-          {% for f in app.files %}
-          <li>
-            <a href="/download/{{ f.id }}">{{ f.file_name }}</a>
-          </li>
-          {% endfor %}
-        </ul>
-        {% else %} No Files {% endif %}
-      </td>
-  
-      {% if user.person_type == "employee" %}
-      <td>
-        <!-- Accept Form -->
-        <form method="POST" action="/dashboard/decision" style="display: inline">
-          <input type="hidden" name="application_id" value="{{ app.id }}" />
-          <input type="hidden" name="decision" value="accept" />
-          <button class="btn">Annehmen</button>
-        </form>
-  
-        <form method="POST" action="/dashboard/decision" style="display: inline">
-          <input type="hidden" name="application_id" value="{{ app.id }}" />
-          <input type="hidden" name="decision" value="reject" />
-          <button class="btn">Ablehnen</button>
-        </form>
-      </td>
+    </div>
+
+    <div class="col flex">
+      <p>Dateien:</p>
+      {% if app.files %}
+      <ul>
+        {% for f in app.files %}
+        <li>
+          <a href="/download/{{ f.id }}">{{ f.file_name }}</a>
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <p>No Files</p>
       {% endif %}
-    </tr>
-    {% endfor %}
-  </table>
-{% endif %}
-
-
-
-{% if user.person_type == "customer" %}
-<p>
-  <a class="btn" href="/loan">Einen Kreditantrag erstellen</a>
-</p>
-{% endif %} 
-{% if user.person_type == "admin" %}
-<h2>Benutzer Verwaltung</h2>
-<table>
-  <tr>
-    <th>ID</th>
-    <th>Name</th>
-    <th>Email</th>
-    <th>Type</th>
-    <th>Action</th>
-  </tr>
-  {% for u in users %}
-  <tr>
-    <td>{{ u.id }}</td>
-    <td>{{ u.first_name }} {{ u.second_name }}</td>
-    <td>{{ u.email }}</td>
-    <td>
-        <form class="flex user-management" method="POST" action="/dashboard/update-user">
-          <input type="hidden" name="user_id" value="{{ u.id }}" />
-          <select name="person_type">
-            <option value="customer" {% if u.person_type == "customer" %}selected{% endif %}>Customer</option>
-            <option value="employee" {% if u.person_type == "employee" %}selected{% endif %}>Employee</option>
-            <option value="admin" {% if u.person_type == "admin" %}selected{% endif %}>Admin</option>
-          </select>
-          <button class="btn" type="submit">Update</button>        
-        </form>    
-    </td>
-  </tr>
+    </div>
+    {% if user.person_type == "employee" %}
+    <div class="col flex">
+      <p>Aktionen:</p>
+      <form method="POST" action="/dashboard/decision" style="display: inline">
+        <input type="hidden" name="application_id" value="{{ app.id }}" />
+        <input type="hidden" name="decision" value="accept" />
+        <button class="btn">Annehmen</button>
+      </form>
+      <form method="POST" action="/dashboard/decision" style="display: inline">
+        <input type="hidden" name="application_id" value="{{ app.id }}" />
+        <input type="hidden" name="decision" value="reject" />
+        <button class="btn">Ablehnen</button>
+      </form>
+    </div>
+    {% endif %}
+  </div>
   {% endfor %}
-</table>
-{% endif %}
+  {% if user.person_type == "customer" %}
+  <p class="text-center">
+    <a class="btn" href="/loan">Einen Kreditantrag erstellen</a>
+  </p>
+  {% endif %} 
+   {% endif %} {% if user.person_type == "admin" %}
+  {% for u in users %}
 
+  <div class="flex flex-space-between full-width {% if u.person_type == 'admin' %}admin{% elif u.person_type == 'employee' %}employee{% else %}customer{% endif %}">
+    <div class="col flex">
+      <p>ID</p>
+      <p>{{ u.id }}</p>
+    </div>
+
+    <div class="col flex">
+      <p>Name</p>
+      <p>{{ u.first_name }} {{ u.second_name }}</p>
+    </div>
+
+    <div class="col col-email flex">
+      <p>Email</p>
+      <p>{{ u.email }}</p>
+    </div>
+
+    <div class="col col-actions flex">
+      <p>Typ</p>
+      <form class="user-management" method="POST" action="/dashboard/update-user">
+        <input type="hidden" name="user_id" value="{{ u.id }}" />
+        <select name="person_type">
+          <option value="customer" {% if u.person_type == "customer" %}selected{% endif %}>Customer</option>
+          <option value="employee" {% if u.person_type == "employee" %}selected{% endif %}>Employee</option>
+          <option value="admin" {% if u.person_type == "admin" %}selected{% endif %}>Admin</option>
+        </select>
+        <button class="btn" type="submit">Update</button>        
+      </form> 
+    </div>
+  </div>
+  {% endfor %} 
+  {% endif %}
+</div>
 {% endblock %}

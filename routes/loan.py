@@ -1,11 +1,10 @@
 from fastapi import APIRouter, Request, Form, Depends
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
-from sqlalchemy.orm import Session
-
+from sqlalchemy.orm import Session 
 from models import Application, Person
 from routes.utils import get_db, require_login
-
+from routes.utils import get_db, require_login
 router = APIRouter()
 templates = Jinja2Templates(directory="templates")
 
@@ -35,7 +34,7 @@ def validate_building_loan(loan_subtype, term_in_years):
 
 @router.get("/loan", response_class=HTMLResponse)
 def get_loan_form(request: Request, user: Person = Depends(require_login)):
-    return templates.TemplateResponse("loan.html", {"request": request, "person_identifier": user.id})
+    return templates.TemplateResponse("loan.html", {"request": request, "person_identifier": user.id, "user": user})
 
 @router.post("/loan_submit", response_class=HTMLResponse)
 def loan_submit(
