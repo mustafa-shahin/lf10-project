@@ -108,8 +108,8 @@ content %}
       <form class="user-management" method="POST" action="/dashboard/update-user">
         <input type="hidden" name="user_id" value="{{ u.id }}" />
         <select name="person_type">
-          <option value="customer" {% if u.person_type == "customer" %}selected{% endif %}>Customer</option>
-          <option value="employee" {% if u.person_type == "employee" %}selected{% endif %}>Employee</option>
+          <option value="customer" {% if u.person_type == "customer" %}selected{% endif %}>Kunde</option>
+          <option value="employee" {% if u.person_type == "employee" %}selected{% endif %}>Mitarbeiter</option>
           <option value="admin" {% if u.person_type == "admin" %}selected{% endif %}>Admin</option>
         </select>
         <button class="btn" type="submit">Update</button>        
