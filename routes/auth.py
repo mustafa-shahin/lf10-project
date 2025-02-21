@@ -175,5 +175,6 @@ def post_reset_password(
     person.reset_token = None
     person.reset_token_expiration = None
     db.commit()
-
-    return RedirectResponse(url="/login", status_code=303)
+    session_id = str(uuid.uuid4())
+    sessions[session_id] = person.id
+    return post_login(request, email=person.email, password=new_password, db=db)
