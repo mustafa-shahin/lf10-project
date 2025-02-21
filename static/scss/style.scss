@@ -292,17 +292,28 @@ td:has(ul.margin-0) {
   left: -63px;
 }
 .admin,
-.rejected {
+.rejected,
+.admin .user-management select {
   background: #a31e1e;
 }
 .employee,
-.approved {
+.approved,
+.employee .user-management select {
   background: #1e5128;
 }
 .customer,
-.in-progress {
+.in-progress,
+.customer .user-management select {
   background: #2d4263;
 }
 .text-center {
   text-align: center;
+}
+.customer .user-management select,
+.employee .user-management select,
+.admin .user-management select {
+  color: #fff;
+  &:focus {
+    border-color: #fff;
+  }
 }
