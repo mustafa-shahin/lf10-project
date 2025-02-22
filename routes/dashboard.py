@@ -115,7 +115,5 @@ def update_user_role(
         db.refresh(user_obj)
 
     # After updating, go back to dashboard
-    # If the logged-in user is admin, the GET /dashboard route
-    # will automatically render admin_users.html for them
     return RedirectResponse(url="/dashboard", status_code=303)
 
