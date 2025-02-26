@@ -72,7 +72,7 @@ def process_loan_decision(
 
     if decision == "accept":
         app_obj.status = "angenommen"
-    elif decision == "rejected":
+    elif decision == "reject":
         app_obj.status = "abgelehnt"
 
     app_obj.decided_at = datetime.utcnow()
