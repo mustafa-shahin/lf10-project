@@ -1,7 +1,7 @@
 $font-stack: "Open Sans", Arial, sans-serif;
 $primary-color: #333;
 $accent-color: #007bff;
-$background-color: #1d2125;
+$background-color: #0a1d29;
 $border-radius: 6px;
 $color: #fff;
 
@@ -24,7 +24,6 @@ body {
 
 h1 {
   margin-top: 0;
-  margin-bottom: 1.5rem;
   font-size: 1.5rem;
 }
 
@@ -291,29 +290,319 @@ td:has(ul.margin-0) {
   position: relative;
   left: -63px;
 }
-.admin,
-.rejected,
-.admin .user-management select {
-  background: #a31e1e;
-}
-.employee,
-.approved,
-.employee .user-management select {
-  background: #1e5128;
-}
-.customer,
-.in-progress,
-.customer .user-management select {
-  background: #2d4263;
-}
+
 .text-center {
   text-align: center;
 }
-.customer .user-management select,
-.employee .user-management select,
-.admin .user-management select {
-  color: #fff;
-  &:focus {
-    border-color: #fff;
+//////// Table.scss
+
+* {
+  margin: 0;
+  padding: 0;
+
+  box-sizing: border-box;
+  font-family: sans-serif;
+}
+@media print {
+  .table,
+  .table__body {
+    overflow: visible;
+    height: auto !important;
+    width: auto !important;
   }
+}
+main.table {
+  width: 82vw;
+  background-color: #0c293c;
+  backdrop-filter: blur(7px);
+  box-shadow: 0 0.4rem 0.8rem #0005;
+  border-radius: 0.8rem;
+
+  overflow: hidden;
+}
+
+.table__header {
+  width: 100%;
+  height: 10%;
+  background-color: #fff4;
+  padding: 0.8rem 1rem;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.table__header .input-group {
+  width: 35%;
+  height: 100%;
+  background-color: #fff5;
+  padding: 0 0.8rem;
+  border-radius: 2rem;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  transition: 0.2s;
+}
+
+.table__header .input-group:hover {
+  width: 45%;
+  background-color: #fff8;
+  box-shadow: 0 0.1rem 0.4rem #0002;
+}
+
+.table__header .input-group img {
+  width: 1.2rem;
+  height: 1.2rem;
+}
+
+.table__header .input-group input {
+  width: 100%;
+  padding: 0 0.5rem 0 0.3rem;
+  background-color: transparent;
+  border: none;
+  outline: none;
+  height: 45px;
+}
+
+.table__body {
+  width: 95%;
+  max-height: calc(89% - 1.6rem);
+  margin: 0.8rem auto;
+  border-radius: 0.6rem;
+  overflow: auto;
+  overflow: overlay;
+}
+
+.table__body::-webkit-scrollbar {
+  width: 0.5rem;
+  height: 0.5rem;
+}
+
+.table__body::-webkit-scrollbar-thumb {
+  border-radius: 0.5rem;
+  background-color: #0004;
+  visibility: hidden;
+}
+
+.table__body:hover::-webkit-scrollbar-thumb {
+  visibility: visible;
+}
+
+table {
+  width: 100%;
+}
+
+td img {
+  width: 36px;
+  height: 36px;
+  margin-right: 0.5rem;
+  border-radius: 50%;
+
+  vertical-align: middle;
+}
+
+table,
+th,
+td {
+  border-collapse: collapse;
+  padding: 1rem;
+  text-align: left;
+}
+
+thead th {
+  position: sticky;
+  top: 0;
+  left: 0;
+  background-color: #2e2a50;
+  cursor: pointer;
+  text-transform: capitalize;
+}
+
+tbody tr {
+  --delay: 0.1s;
+  transition: 0.5s ease-in-out var(--delay), background-color 0s;
+}
+
+tbody tr.hide {
+  opacity: 0;
+  transform: translateX(100%);
+}
+
+tbody tr td,
+tbody tr td p,
+tbody tr td img {
+  transition: 0.2s ease-in-out;
+}
+
+tbody tr.hide td,
+tbody tr.hide td p {
+  padding: 0;
+  font: 0 / 0 sans-serif;
+  transition: 0.2s ease-in-out 0.5s;
+}
+
+tbody tr.hide td img {
+  width: 0;
+  height: 0;
+  transition: 0.2s ease-in-out 0.5s;
+}
+
+.status {
+  padding: 0.4rem 0;
+  border-radius: 2rem;
+  text-align: center;
+  width: 102%;
+}
+
+.accepted,
+.employee {
+  background-color: #216d33;
+  &:hover {
+    background-color: #107b29;
+  }
+}
+.rejected,
+.admin {
+  background-color: #591f29;
+  &:hover {
+    background-color: #792836;
+  }
+}
+
+.pending,
+.customer {
+  background-color: #194d6b;
+  &:hover {
+    background-color: #19587d;
+  }
+}
+
+@media (max-width: 1000px) {
+  td:not(:first-of-type) {
+    min-width: 12.1rem;
+  }
+}
+
+thead th span.icon-arrow {
+  display: inline-block;
+  width: 1.3rem;
+  height: 1.3rem;
+  border-radius: 50%;
+  border: 1.4px solid transparent;
+
+  text-align: center;
+  font-size: 1rem;
+
+  margin-left: 0.5rem;
+  transition: 0.2s ease-in-out;
+}
+
+thead th:hover span.icon-arrow {
+  border: 1.4px solid #6c00bd;
+}
+
+thead th:hover {
+  color: #6c00bd;
+}
+
+thead th.active span.icon-arrow {
+  background-color: #6c00bd;
+  color: #fff;
+}
+
+thead th.asc span.icon-arrow {
+  transform: rotate(180deg);
+}
+
+thead th.active,
+tbody td.active {
+  color: #6c00bd;
+}
+
+.export__file .export__file-btn:hover {
+  background-color: #fff;
+  transform: scale(1.15);
+  cursor: pointer;
+}
+
+.export__file input {
+  display: none;
+}
+
+.export__file .export__file-options {
+  position: absolute;
+  right: 0;
+
+  width: 12rem;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  text-align: center;
+
+  opacity: 0;
+  transform: scale(0.8);
+  transform-origin: top right;
+
+  box-shadow: 0 0.2rem 0.5rem #0004;
+
+  transition: 0.2s;
+}
+
+.export__file input:checked + .export__file-options {
+  opacity: 1;
+  transform: scale(1);
+  z-index: 100;
+}
+
+.export__file .export__file-options label {
+  display: block;
+  width: 100%;
+  padding: 0.6rem 0;
+  background-color: #f2f2f2;
+
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+
+  transition: 0.2s ease-in-out;
+}
+
+.export__file .export__file-options label:first-of-type {
+  padding: 1rem 0;
+  background-color: #86e49d !important;
+}
+
+.export__file .export__file-options label:hover {
+  transform: scale(1.05);
+  background-color: #fff;
+  cursor: pointer;
+}
+
+.export__file .export__file-options img {
+  width: 2rem;
+  height: auto;
+}
+//////table.scss end
+
+.logout img {
+  position: relative;
+  top: 16px;
+}
+.table-body {
+  padding: 30px 0;
+}
+.user-management select {
+  color: #fff;
+  border: unset;
+  border: #fff 0.1px solid;
+}
+.input-group input {
+  color: $color;
+}
+.border-top-right-radius {
+  border-top-right-radius: 10px;
+}
+.border-top-left-radius {
+  border-top-left-radius: 10px;
 }

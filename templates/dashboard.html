@@ -1,122 +1,139 @@
-{% extends "base.html" %} {% block title %}Dashboard{% endblock %} {% block
-content %}
+{% extends "base.html" %}
+{% block title %}
+Dashboard
+{% endblock %}
 
-<div class="dashboard-container">
-  {% if user.person_type == "admin" %}
-  <h1 class="text-center">Benutzer</h1>
-  {% else %}
-  <h1 class="text-center">Anträge</h1>
-  {% endif %} {% if user.person_type != "admin" %} {% for app in applications %}
-  <div class="flex flex-space-between full-width {% if app.status == 'angenommen' %}approved{% elif app.status == 'in bearbeitung' %}in-progress{% else %}rejected{% endif %}">
-    <div class="col flex">
-      <p>Antrag:</p>
-      <p>{{ app.loan_type }}</p>
-    </div>
+{% block content %}
 
-    <div class="col flex">
-      <p>Typ:</p>
-      <p>{{ app.loan_subtype }}</p>
-    </div>
-
-    <div class="col flex">
-      <p>Höhe:</p>
-      <p>{{ app.requested_amount }}</p>
-    </div>
-
-    <div class="col flex">
-      <p>Term:</p>
-      <p>{{ app.term_in_years }}</p>
-    </div>
-
-    <div class="col flex">
-      <p>Status</p>
-      <p>{{ app.status }}</p>
-    </div>
-
-    <div class="col flex">
-      <p>Erstelldatum:</p>
-      {% if app.created_at %}
-      <p>{{ app.created_at.strftime("%Y-%m-%d") }}</p>
-
-      {% endif %}
-    </div>
-
-    <div class="col flex">
-      <p>Entscheidungsdatum:</p>
-      {% if app.decided_at %}
-      <p>{{ app.decided_at.strftime("%Y-%m-%d") }}</p>
-      {% endif %}
-    </div>
-
-    <div class="col flex">
-      <p>Dateien:</p>
-      {% if app.files %}
-      <ul>
-        {% for f in app.files %}
-        <li>
-          <a href="/download/{{ f.id }}">{{ f.file_name }}</a>
-        </li>
-        {% endfor %}
-      </ul>
-      {% else %}
-      <p>No Files</p>
-      {% endif %}
-    </div>
-    {% if user.person_type == "employee" %}
-    <div class="col flex">
-      <p>Aktionen:</p>
-      <form method="POST" action="/dashboard/decision" style="display: inline">
-        <input type="hidden" name="application_id" value="{{ app.id }}" />
-        <input type="hidden" name="decision" value="accept" />
-        <button class="btn">Annehmen</button>
-      </form>
-      <form method="POST" action="/dashboard/decision" style="display: inline">
-        <input type="hidden" name="application_id" value="{{ app.id }}" />
-        <input type="hidden" name="decision" value="reject" />
-        <button class="btn">Ablehnen</button>
-      </form>
-    </div>
-    {% endif %}
-  </div>
-  {% endfor %}
-  {% if user.person_type == "customer" %}
-  <p class="text-center">
+{% if user.person_type != "admin" %}
+<main class="table" id="applications_table">
+    <section class="table__header">
+        <h1>{{ "Anträge" if user.person_type == "customer" else "Kreditanträge" }}</h1>
+        <div class="input-group">
+            <input type="search" placeholder="Suche...">
+            <img src="/static/images/search.png" alt="">
+        </div>
+    </section>
+    <section class="table__body">
+        <div class="table-body">
+            <table>
+                <thead>
+                    <tr>
+                        <th class="border-top-left-radius">ID</th>
+                        <th>Antrag</th>
+                        <th>Typ</th>
+                        <th>Höhe</th>
+                        <th>Term (Jahre)</th>
+                        <th>Status</th>
+                        <th>Erstelldatum</th>
+                        <th>Entscheidungsdatum</th>
+                        <th class="{% if user.person_type == 'customer' %}border-top-right-radius{% endif %}">Dateien</th>
+                        {% if user.person_type == "employee" %}
+                        <th class="border-top-right-radius">Aktionen</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for app in applications %}
+                    <tr class="{{ app.status_class }}">
+                        <td>{{ app.id }}</td>
+                        <td>{{ app.loan_type }}</td>
+                        <td>{{ app.loan_subtype }}</td>
+                        <td>{{ app.requested_amount }}</td>
+                        <td>{{ app.term_in_years }}</td>
+                        <td>
+                            <p class="status">
+                                {{ "Angenommen" if app.status == "angenommen" else "In Bearbeitung" if app.status == "in bearbeitung" else "Abgelehnt" }}
+                            </p>
+                        </td>
+                        <td>{{ app.created_at }}</td>
+                        <td>{{ app.decided_at }}</td>
+                        <td>
+                            {% if app.files %}
+                            <ul>
+                                {% for f in app.files %}
+                                <li><a href="/download/{{ f.id }}">{{ f.file_name }}</a></li>
+                                {% endfor %}
+                            </ul>
+                            {% else %}
+                            Keine Dateien
+                            {% endif %}
+                        </td>
+                        {% if user.person_type == "employee" %}
+                        <td>
+                            <form method="POST" action="/dashboard/decision" style="display: inline;">
+                                <input type="hidden" name="application_id" value="{{ app.id }}">
+                                <input type="hidden" name="decision" value="accept">
+                                <button class="btn">Annehmen</button>
+                            </form>
+                            <form method="POST" action="/dashboard/decision" style="display: inline;">
+                                <input type="hidden" name="application_id" value="{{ app.id }}">
+                                <input type="hidden" name="decision" value="reject">
+                                <button class="btn">Ablehnen</button>
+                            </form>
+                        </td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+    {% if user.person_type == "customer" %}
+<p class="text-center loan-button">
     <a class="btn" href="/loan">Einen Kreditantrag erstellen</a>
-  </p>
-  {% endif %} 
-   {% endif %} {% if user.person_type == "admin" %}
-  {% for u in users %}
+</p>
+{% endif %}
+<script src="{{ url_for('static_files', path='scripts/script.js') }}"></script>
+</main>
 
-  <div class="flex flex-space-between full-width {% if u.person_type == 'admin' %}admin{% elif u.person_type == 'employee' %}employee{% else %}customer{% endif %}">
-    <div class="col flex">
-      <p>ID</p>
-      <p>{{ u.id }}</p>
-    </div>
+{% endif %}
 
-    <div class="col flex">
-      <p>Name</p>
-      <p>{{ u.first_name }} {{ u.second_name }}</p>
-    </div>
+{% if user.person_type == "admin" %}
+<main class="table" id="users_table">
+    <section class="table__header">
+        <h1>Benutzerverwaltung</h1>
+        <div class="input-group">
+            <input type="search" placeholder="Suche...">
+            <img src="/static/images/search.png" alt="">
+        </div>
+    </section>
+    <section class="table__body">
+        <div class="table-body">
+            <table>
+                <thead>
+                    <tr>
+                        <th class="border-top-left-radius">ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th class="border-top-right-radius">Typ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for u in users %}
+                    <tr class="{{ u.person_class }}">
+                        <td>{{ u.id }}</td>
+                        <td>{{ u.name }}</td>
+                        <td>{{ u.email }}</td>
+                        <td>
+                            <form method="POST" action="/dashboard/update-user" class="user-management">
+                                <input type="hidden" name="user_id" value="{{ u.id }}">
+                                <select name="person_type" class=" {{ u.person_class }}">
+                                    <option value="customer" {% if u.person_type == "customer" %}selected{% endif %}>Kunde</option>
+                                    <option value="employee" {% if u.person_type == "employee" %}selected{% endif %}>Mitarbeiter</option>
+                                    <option value="admin" {% if u.person_type == 'admin' %}selected{% endif %}>Admin</option>
+                                </select>
+                                <button class="btn" type="submit">Update</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+<script src="{{ url_for('static_files', path='scripts/script.js') }}"></script>
+{% endif %}
 
-    <div class="col col-email flex">
-      <p>Email</p>
-      <p>{{ u.email }}</p>
-    </div>
-
-    <div class="col col-actions flex">
-      <p>Typ</p>
-      <form class="user-management" method="POST" action="/dashboard/update-user">
-        <input type="hidden" name="user_id" value="{{ u.id }}" />
-        <select name="person_type">
-          <option value="customer" {% if u.person_type == "customer" %}selected{% endif %}>Kunde</option>
-          <option value="employee" {% if u.person_type == "employee" %}selected{% endif %}>Mitarbeiter</option>
-          <option value="admin" {% if u.person_type == "admin" %}selected{% endif %}>Admin</option>
-        </select>
-        <button class="btn" type="submit">Update</button>        
-      </form> 
-    </div>
-  </div>
-  {% endfor %} 
-  {% endif %}
-</div>
 {% endblock %}

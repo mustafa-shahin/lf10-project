@@ -11,48 +11,69 @@ router = APIRouter()
 templates = Jinja2Templates(directory="templates")
 
 @router.get("/dashboard", response_class=HTMLResponse)
+@router.get("/dashboard", response_class=HTMLResponse)
 def get_dashboard(
     request: Request,
     db: Session = Depends(get_db),
     user: Person = Depends(require_login)
 ):
-    # If admin => show admin_users.html
     if user.person_type == "admin":
         applications = db.query(Application).all()
         users = db.query(Person).all()
-        return templates.TemplateResponse(
-            "dashboard.html",
-            {
-                "request": request,
-                "user": user,
-                "applications": applications,
-                "users": users
-            }
-        )
     elif user.person_type == "employee":
-        # Employees see all applications
         applications = db.query(Application).all()
-        return templates.TemplateResponse(
-            "dashboard.html",
-            {
-                "request": request,
-                "user": user,
-                "applications": applications,
-                "users": []  # no user management for employees
-            }
-        )
+        users = [] 
     else:
-        # customers see only their own apps
         applications = db.query(Application).filter(Application.person_id == user.id).all()
-        return templates.TemplateResponse(
-            "dashboard.html",
-            {
-                "request": request,
-                "user": user,
-                "applications": applications,
-                "users": []
-            }
-        )
+        users = []
+
+    # Map status to CSS classes
+    status_class_mapping = {
+        "angenommen": "accepted",
+        "in bearbeitung": "pending",
+        "abgelehnt": "rejected"
+    }
+
+    processed_apps = []
+    for app in applications:
+        app_css_class = status_class_mapping.get(app.status, "unknown")
+        processed_apps.append({
+            "id": app.id,
+            "loan_type": app.loan_type,
+            "loan_subtype": app.loan_subtype,
+            "requested_amount": app.requested_amount,
+            "term_in_years": app.term_in_years,
+            "status": app.status,
+            "status_class": app_css_class, 
+            "created_at": app.created_at.strftime("%Y-%m-%d") if app.created_at else "",
+            "decided_at": app.decided_at.strftime("%Y-%m-%d") if app.decided_at else "",
+            "files": app.files 
+        })
+    user_class_mapping = {
+        "admin": "admin",
+        "employee": "employee",
+        "customer": "customer"
+    }
+
+    processed_users = []
+    for u in users:
+        processed_users.append({
+            "id": u.id,
+            "name": f"{u.first_name} {u.second_name}",
+            "email": u.email,
+            "person_type": u.person_type,
+            "person_class": user_class_mapping.get(u.person_type, "unknown")  # Precomputed class
+        })
+
+    return templates.TemplateResponse(
+        "dashboard.html",
+        {
+            "request": request,
+            "user": user,
+            "applications": processed_apps,
+            "users": processed_users
+        }
+    )
 
 @router.post("/dashboard/decision")
 def process_loan_decision(
@@ -62,7 +83,6 @@ def process_loan_decision(
     db: Session = Depends(get_db),
     user: Person = Depends(require_login)
 ):
-    # Only employees (and maybe admin, if you like) can accept/reject
     if user.person_type not in ("employee", "admin"):
         return RedirectResponse(url="/dashboard", status_code=303)
 
