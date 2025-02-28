@@ -61,7 +61,7 @@ Dashboard
                         </td>
                         {% if user.person_type == "employee" %}
                         <td>
-                            <form method="POST" action="/dashboard/decision" style="display: inline;">
+                            <form method="POST" action="/dashboard/decision" style="display: inline;" class="flex-center">
                                 <input type="hidden" name="application_id" value="{{ app.id }}">
                                 <input type="hidden" name="decision" value="accept">
                                 <button class="btn">Annehmen</button>
@@ -116,7 +116,7 @@ Dashboard
                         <td>{{ u.name }}</td>
                         <td>{{ u.email }}</td>
                         <td>
-                            <form method="POST" action="/dashboard/update-user" class="user-management">
+                            <form method="POST" action="/dashboard/update-user" class="user-management flex-center">
                                 <input type="hidden" name="user_id" value="{{ u.id }}">
                                 <select name="person_type" class=" {{ u.person_class }}">
                                     <option value="customer" {% if u.person_type == "customer" %}selected{% endif %}>Kunde</option>

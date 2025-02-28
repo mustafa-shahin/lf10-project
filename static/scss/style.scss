@@ -42,10 +42,10 @@ form {
   #password,
   select {
     padding: 0.6rem;
-    margin-bottom: 1rem;
     border: 1px solid #ccc;
     border-radius: $border-radius;
     transition: border-color 0.2s, box-shadow 0.2s;
+    max-height: 60px;
 
     &:focus {
       outline: none;
@@ -365,7 +365,9 @@ main.table {
   outline: none;
   height: 45px;
 }
-
+::placeholder {
+  color: #fff;
+}
 .table__body {
   width: 95%;
   max-height: calc(89% - 1.6rem);
@@ -605,4 +607,7 @@ tbody td.active {
 }
 .border-top-left-radius {
   border-top-left-radius: 10px;
+}
+.user-management button {
+  margin-bottom: 0;
 }

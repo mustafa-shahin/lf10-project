@@ -29,9 +29,13 @@ class SCSSWatchHandler(FileSystemEventHandler):
 
 def recompile_scss():
     print(f"[watchdog] Compiling SCSS dir: {SASS_IN} -> {SASS_OUT}")
+    # sass.compile(
+    #     dirname=(SASS_IN, SASS_OUT),
+    #     output_style="compressed"
+    # )
     sass.compile(
         dirname=(SASS_IN, SASS_OUT),
-        output_style="compressed"
+        output_style="expanded"
     )
     print("[watchdog] Done.")
 
