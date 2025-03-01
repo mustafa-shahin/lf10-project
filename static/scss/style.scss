@@ -71,14 +71,12 @@ form {
 }
 .wrapper {
   display: flex;
-  flex-direction: column;
   align-content: center;
   justify-content: center;
   align-items: center;
 }
 .address {
   display: flex;
-  flex-direction: column;
   margin: 0 5px;
 }
 .street-house-number,
@@ -138,11 +136,17 @@ form {
 .flex.flex-center.flex-space-between {
   gap: 10px;
 }
+.flex-direction-column {
+  flex-direction: column;
+}
+
 .requested-amount,
 #termGroup,
-#repayAmountGroup {
-  display: flex;
-  flex-direction: column;
+#repayAmountGroup,
+#available_income,
+#total_debt_payments,
+#collateral_value,
+#total_outstanding_debt {
   input {
     height: 35px;
     border-radius: 6px;
@@ -200,13 +204,13 @@ form {
     display: block;
   }
   input {
-    width: 95%;
+    width: 100%;
   }
 }
 .first_name,
 .last_name {
   input {
-    width: 88%;
+    width: 97%;
   }
 }
 
@@ -245,7 +249,6 @@ a.btn {
   }
 }
 .flex.user-info {
-  flex-direction: column;
   position: relative;
   top: 21px;
   align-content: center;
@@ -610,4 +613,14 @@ tbody td.active {
 }
 .user-management button {
   margin-bottom: 0;
+}
+.flex-direction-column {
+  flex-direction: column;
+}
+.last_name {
+  position: relative;
+  left: 5px;
+}
+.register-form .btn {
+  margin-top: 10px;
 }

@@ -1,5 +1,5 @@
 # models.py
-from sqlalchemy import Column, Integer, String, ForeignKey, LargeBinary, DateTime
+from sqlalchemy import Column, Float, Integer, String, ForeignKey, LargeBinary, DateTime
 from sqlalchemy.orm import relationship
 from db import Base
 from datetime import datetime
@@ -54,6 +54,10 @@ class Application(Base):
     decided_at = Column(DateTime, nullable=True)
     # The user who handled this request (admin or employee)
     handled_by_id = Column(Integer, ForeignKey("person.id"), nullable=True)
+
+    dscr = Column(Float, nullable=True)      
+    ccr = Column(Float, nullable=True)        
+    bonitaet = Column(String, nullable=True)  
     # Relationship to the Person who owns this application
     person = relationship(
         "Person",

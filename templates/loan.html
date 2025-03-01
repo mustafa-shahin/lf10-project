@@ -20,11 +20,9 @@ block content %}
     name="loan_subtype"
     required
     onchange="onSubTypeChange()"
-  >
-    <!-- Dynamically added in loan_submit.js -->
-  </select>
+  ></select>
 
-  <div class="requested-amount">
+  <div class="requested-amount flex flex-direction-column">
     <label for="requested_amount">Gewünschter Darlehensbetrag (€):</label>
     <input
       type="number"
@@ -35,7 +33,11 @@ block content %}
     />
   </div>
 
-  <div id="repayAmountGroup" style="display: none">
+  <div
+    id="repayAmountGroup"
+    style="display: none"
+    class="flex-direction-column"
+  >
     <label for="repayment_amount">Rückzahlungsbetrag (€/Monat):</label>
     <input
       type="number"
@@ -45,13 +47,58 @@ block content %}
     />
   </div>
 
-  <div id="termGroup" style="display: none">
+  <div id="termGroup" style="display: none" class="flex-direction-column">
     <label for="term_in_years">Laufzeit (Jahre):</label>
     <input
       type="number"
       id="term_in_years"
       name="term_in_years"
       min="1"
+      required
+    />
+  </div>
+  <div id="available_income" class="flex flex-direction-column">
+    <label for="available_income">Verfügbares Einkommen (€):</label>
+    <input
+      type="number"
+      step="0.01"
+      id="available_income"
+      name="available_income"
+      min="0"
+      required
+    />
+  </div>
+  <div id="total_debt_payments" class="flex flex-direction-column">
+    <label for="total_debt_payments">Schuldenzahlungen pro Jahr (€):</label>
+    <input
+      type="number"
+      step="0.01"
+      id="total_debt_payments"
+      name="total_debt_payments"
+      min="0"
+      required
+    />
+  </div>
+  <div id="collateral_value" class="flex flex-direction-column">
+    <label for="collateral_value">Wert der Sicherheiten (€):</label>
+    <input
+      type="number"
+      step="0.01"
+      id="collateral_value"
+      name="collateral_value"
+      min="0"
+      required
+    />
+  </div>
+
+  <div id="total_outstanding_debt" class="flex flex-direction-column">
+    <label for="total_outstanding_debt">Ausstehende Gesamtschulden (€):</label>
+    <input
+      type="number"
+      step="0.01"
+      id="total_outstanding_debt"
+      name="total_outstanding_debt"
+      min="0"
       required
     />
   </div>
