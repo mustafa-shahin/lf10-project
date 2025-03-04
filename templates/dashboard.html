@@ -29,6 +29,8 @@ Dashboard
                         <th>Entscheidungsdatum</th>
                         <th class="{% if user.person_type == 'customer' %}border-top-right-radius{% endif %}">Dateien</th>
                         {% if user.person_type == "employee" %}
+                        <th class="">Entscheidung</th>
+                        <th class="">Grund</th>
                         <th class="border-top-right-radius">Aktionen</th>
                         {% endif %}
                     </tr>
@@ -61,15 +63,26 @@ Dashboard
                         </td>
                         {% if user.person_type == "employee" %}
                         <td>
-                            <form method="POST" action="/dashboard/decision" style="display: inline;" class="flex-center">
+                            <p>
+                                {{ "Ablehnen" if app.decision == "rejected" else "Annehmen" }}
+                            </p>
+                            
+                        </td>
+                        <td>
+                            <p>
+                                {{ app.reason }}
+                            </p>
+                        </td>
+                        <td>
+                            <form method="POST" action="/dashboard/decision"  class="flex-center decision">
                                 <input type="hidden" name="application_id" value="{{ app.id }}">
                                 <input type="hidden" name="decision" value="accept">
-                                <button class="btn">Annehmen</button>
+                                <button class="btn btn-success">Annehmen</button>
                             </form>
-                            <form method="POST" action="/dashboard/decision" style="display: inline;">
+                            <form method="POST" action="/dashboard/decision" class="flex-center decision">
                                 <input type="hidden" name="application_id" value="{{ app.id }}">
                                 <input type="hidden" name="decision" value="reject">
-                                <button class="btn">Ablehnen</button>
+                                <button class="btn btn-danger">Ablehnen</button>
                             </form>
                         </td>
                         {% endif %}

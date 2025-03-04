@@ -47,6 +47,8 @@ def get_dashboard(
             "status_class": app_css_class, 
             "created_at": app.created_at.strftime("%Y-%m-%d") if app.created_at else "",
             "decided_at": app.decided_at.strftime("%Y-%m-%d") if app.decided_at else "",
+            "decision": app.decision,
+            "reason": app.reason,
             "files": app.files 
         })
     user_class_mapping = {

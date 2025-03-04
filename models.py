@@ -59,6 +59,9 @@ class Application(Base):
     ccr = Column(Float, nullable=True)        
     bonitaet = Column(String, nullable=True)  
     # Relationship to the Person who owns this application
+
+    decision = Column(String, nullable=True)
+    reason = Column(String, nullable=True)
     person = relationship(
         "Person",
         back_populates="applications",

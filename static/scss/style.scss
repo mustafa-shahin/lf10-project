@@ -315,7 +315,7 @@ td:has(ul.margin-0) {
   }
 }
 main.table {
-  width: 82vw;
+  width: 90vw;
   background-color: #0c293c;
   backdrop-filter: blur(7px);
   box-shadow: 0 0.4rem 0.8rem #0005;
@@ -623,4 +623,15 @@ tbody td.active {
 }
 .register-form .btn {
   margin-top: 10px;
+}
+.btn-success {
+  background-color: #28a745;
+}
+.btn-danger {
+  background-color: #dc3545;
+}
+.decision button {
+  min-width: 100px;
+  max-width: 100px;
+  width: 100px;
 }

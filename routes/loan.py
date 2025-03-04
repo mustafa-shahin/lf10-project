@@ -4,7 +4,8 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from models import Application, Person
 from routes.utils import get_db, require_login
-from routes.calculations import calculate_dscr, calculate_ccr, get_bonitaet_score
+from .calculations import LoanDecision
+from datetime import datetime
 
 router = APIRouter()
 templates = Jinja2Templates(directory="templates")
@@ -53,12 +54,11 @@ def loan_submit(
     requested_amount: int = Form(...),
     repayment_amount: int = Form(0),
     term_in_years: int = Form(0),
-
     available_income: float = Form(...),
     total_debt_payments: float = Form(...),
     collateral_value: float = Form(...),
     total_outstanding_debt: float = Form(...),
-
+    
     user: Person = Depends(require_login),
     db: Session = Depends(get_db)
 ):
@@ -92,11 +92,17 @@ def loan_submit(
             }
         )
 
-    # Calculate DSCR / CCR
-    dscr_value = calculate_dscr(available_income, total_debt_payments)
-    ccr_value = calculate_ccr(collateral_value, total_outstanding_debt)
-    bonitaet_rating = get_bonitaet_score()
 
+    dscr_value = LoanDecision.calculate_dscr(available_income, total_debt_payments)
+    ccr_value = LoanDecision.calculate_ccr(collateral_value, total_outstanding_debt)
+    bonitaet_rating = LoanDecision.get_bonitaet_score()
+    decision_obj = LoanDecision(
+        boni_score=bonitaet_rating,
+        dscr=dscr_value,
+        ccr=ccr_value,
+        loan_type=type_str  
+    )
+    result = decision_obj.evaluate()
     new_app = Application(
         person_id=user.id,
         loan_type=type_str,
@@ -105,34 +111,17 @@ def loan_submit(
         term_in_years=final_term,
         repayment_amount=repayment_amount,
         status="in bearbeitung",
-        available_income=available_income,
-        total_debt_payments=total_debt_payments,
-        collateral_value=collateral_value,
-        total_outstanding_debt=total_outstanding_debt,
         dscr=dscr_value,
         ccr=ccr_value,
-        bonitaet=bonitaet_rating
+        bonitaet=bonitaet_rating,  # <-- Add comma here
+        decision=result["decision"],
+        reason=result["reason"],
+        decided_at=datetime.utcnow()
     )
+
 
     db.add(new_app)
     db.commit()
     db.refresh(new_app)
-
-    # OPTIONAL: Auto-reject logic based on DSCR/CCR thresholds
-    if dscr_value < 1.0 or ccr_value < 1.0:
-        new_app.status = "abgelehnt"
-        db.commit()
-        return templates.TemplateResponse(
-            "upload_success.html",
-            {
-                "request": request,
-                "user": user,
-                "rejected": True,
-                "rejected_reason": (
-                    f"Bonitätsprüfung negativ (DSCR={dscr_value:.2f}, "
-                    f"CCR={ccr_value:.2f}). Antrag abgelehnt."
-                ),
-            }
-        )
 
     return RedirectResponse(url=f"/upload?application_id={new_app.id}", status_code=303)
