@@ -128,7 +128,7 @@
                 <td>{{ u.name }}</td>
                 <td>{{ u.email }}</td>
                 <td>
-                  <form method="POST" action="/dashboard/update-user" class="user-management flex-center">
+                  <form method="POST" action="/dashboard/update-user" class="user-management flex-center flex-direction-row">
                     <input type="hidden" name="user_id" value="{{ u.id }}">
                     <select name="person_type" class="{{ u.person_class }}">
                       <option value="customer" {% if u.person_type == "customer" %}selected{% endif %}>Kunde</option>

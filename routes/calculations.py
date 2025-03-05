@@ -25,23 +25,17 @@ class LoanDecision:
 
     def evaluate(self):
         if self.boni_score < 579:
-            self.decision = "rejected"
-            self.reason = "Boni zu niedrig"
-            return self.get_result()
+            return self._reject("Boni zu niedrig")
 
         loan_checks = {
             "Sofortkredit": self._check_sofortkredit,
             "Baudarlehen": self._check_baudarlehen
         }
-
         check_method = loan_checks.get(self.loan_type, self._unknown_loan_type)
         return check_method()
 
     def _check_sofortkredit(self):
-        if self.dscr < 1:
-            return self._reject("DSCR zu niedrig für Sofortkredit")
-        if self.ccr > 4:
-            return self._reject("CCR zu hoch für Sofortkredit")
+        # DSCR and CCR are not used for Sofortkredit.
         return self._approve("Sofortkredit genehmigt")
 
     def _check_baudarlehen(self):
@@ -71,4 +65,3 @@ class LoanDecision:
 
     def get_result(self):
         return {"decision": self.decision, "reason": self.reason}
-

@@ -1,4 +1,4 @@
-{% extends "base.html" %} {% block title %}Darlehensantrag {% endblock %} {%
+{% extends "base.html" %} {% block title %}Darlehensantrag{% endblock %} {%
 block content %}
 <h1>Darlehensantrag</h1>
 <form action="/loan_submit" method="POST" class="loan-form">
@@ -10,8 +10,8 @@ block content %}
     onchange="onLoanTypeChange()"
   >
     <option value="">-- Bitte auswählen --</option>
-    <option value="immediate">Sofortdarlehen</option>
-    <option value="building">Baufinanzierung</option>
+    <option value="Sofortkredit">Sofortdarlehen</option>
+    <option value="Baudarlehen">Baufinanzierung</option>
   </select>
 
   <label for="loan_subtype">Untertyp:</label>
@@ -57,7 +57,13 @@ block content %}
       required
     />
   </div>
-  <div id="available_income" class="flex flex-direction-column">
+
+  <!-- DSCR and CCR fields displayed only for Baudarlehen -->
+  <div
+    id="available_income"
+    style="display: none"
+    class="flex flex-direction-column"
+  >
     <label for="available_income">Verfügbares Einkommen (€):</label>
     <input
       type="number"
@@ -68,7 +74,11 @@ block content %}
       required
     />
   </div>
-  <div id="total_debt_payments" class="flex flex-direction-column">
+  <div
+    id="total_debt_payments"
+    style="display: none"
+    class="flex flex-direction-column"
+  >
     <label for="total_debt_payments">Schuldenzahlungen pro Jahr (€):</label>
     <input
       type="number"
@@ -79,7 +89,11 @@ block content %}
       required
     />
   </div>
-  <div id="collateral_value" class="flex flex-direction-column">
+  <div
+    id="collateral_value"
+    style="display: none"
+    class="flex flex-direction-column"
+  >
     <label for="collateral_value">Wert der Sicherheiten (€):</label>
     <input
       type="number"
@@ -90,8 +104,11 @@ block content %}
       required
     />
   </div>
-
-  <div id="total_outstanding_debt" class="flex flex-direction-column">
+  <div
+    id="total_outstanding_debt"
+    style="display: none"
+    class="flex flex-direction-column"
+  >
     <label for="total_outstanding_debt">Ausstehende Gesamtschulden (€):</label>
     <input
       type="number"

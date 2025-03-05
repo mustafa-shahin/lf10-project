@@ -14,18 +14,40 @@ function onLoanTypeChange() {
   const repayAmountGroup = document.getElementById("repayAmountGroup");
   const termGroup = document.getElementById("termGroup");
 
+  // Hide repay amount and term groups initially
   repayAmountGroup.style.display = "none";
   termGroup.style.display = "none";
   subTypeSelect.innerHTML = "";
 
-  const IMMEDIATE_SUBTYPES = ["tilgung", "endfaellig", "annuitaet"];
-  const BUILDING_SUBTYPES = ["annuitaet"];
+  const SOFORT_SUBTYPES = ["tilgung", "endfaellig", "annuitaet"];
+  const BAU_SUBTYPES = ["annuitaet"];
 
-  if (loanType === "immediate") {
-    populateSelect(subTypeSelect, IMMEDIATE_SUBTYPES);
-  } else if (loanType === "building") {
-    populateSelect(subTypeSelect, BUILDING_SUBTYPES);
+  if (loanType === "Sofortkredit") {
+    populateSelect(subTypeSelect, SOFORT_SUBTYPES);
+  } else if (loanType === "Baudarlehen") {
+    populateSelect(subTypeSelect, BAU_SUBTYPES);
   }
+
+  // Show/hide DSCR/CCR fields based on loan type and toggle their required/disabled status
+  const dscrFields = document.querySelectorAll(
+    "#available_income, #total_debt_payments, #collateral_value, #total_outstanding_debt"
+  );
+  dscrFields.forEach((field) => {
+    let input = field.querySelector("input");
+    if (loanType === "Baudarlehen") {
+      field.style.display = "flex";
+      if (input) {
+        input.required = true;
+        input.disabled = false;
+      }
+    } else {
+      field.style.display = "none";
+      if (input) {
+        input.required = false;
+        input.disabled = true;
+      }
+    }
+  });
 
   onSubTypeChange();
 }
@@ -38,10 +60,10 @@ function onSubTypeChange() {
   const termInput = document.getElementById("term_in_years");
 
   const shouldShowRepayAmount =
-    loanType === "immediate" && subType === "tilgung";
+    loanType === "Sofortkredit" && subType === "tilgung";
   const shouldShowTerm =
-    loanType === "building" ||
-    (loanType === "immediate" && subType !== "tilgung");
+    loanType === "Baudarlehen" ||
+    (loanType === "Sofortkredit" && subType !== "tilgung");
 
   repayAmountGroup.style.display = shouldShowRepayAmount ? "flex" : "none";
   termGroup.style.display = shouldShowTerm ? "flex" : "none";

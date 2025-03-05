@@ -2,6 +2,7 @@ import uuid
 import smtplib
 from email.mime.text import MIMEText
 from fastapi import Request, HTTPException, Depends
+from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 from typing import Optional
 
@@ -29,8 +30,9 @@ def get_current_user(request: Request, db: Session = Depends(get_db)) -> Optiona
 def require_login(request: Request, db: Session = Depends(get_db)) -> Person:
     user = get_current_user(request, db=db)
     if not user:
-        raise HTTPException(status_code=401, detail="Unauthorized. Please login.")
-    return user
+        raise HTTPException(status_code=302, headers={"Location": "/login"})
+    else:
+        return user
 
 def create_session_cookie(response, person_id: int):
     session_id = str(uuid.uuid4())
