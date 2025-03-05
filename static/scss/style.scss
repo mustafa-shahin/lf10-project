@@ -235,6 +235,8 @@ a.btn {
 .logout img {
   width: 30px;
   height: 30px;
+  position: relative;
+  top: 16px;
 }
 .user {
   align-items: center;
@@ -254,17 +256,7 @@ a.btn {
   align-content: center;
   align-items: center;
 }
-.user-management {
-  flex-direction: row;
-  button {
-    left: 65px;
-    position: relative;
-  }
-  select {
-    position: relative;
-    left: 40px;
-  }
-}
+
 a {
   color: $color;
 }
@@ -561,11 +553,9 @@ tbody td.active {
 }
 
 .export__file .export__file-options label {
-  display: block;
   width: 100%;
   padding: 0.6rem 0;
   background-color: #f2f2f2;
-
   display: flex;
   justify-content: space-around;
   align-items: center;
@@ -590,10 +580,6 @@ tbody td.active {
 }
 //////table.scss end
 
-.logout img {
-  position: relative;
-  top: 16px;
-}
 .table-body {
   padding: 30px 0;
 }
@@ -601,6 +587,16 @@ tbody td.active {
   color: #fff;
   border: unset;
   border: #fff 0.1px solid;
+  flex-direction: row;
+  button {
+    left: 65px;
+    position: relative;
+    margin-bottom: 0;
+  }
+  select {
+    position: relative;
+    left: 40px;
+  }
 }
 .input-group input {
   color: $color;
@@ -611,12 +607,7 @@ tbody td.active {
 .border-top-left-radius {
   border-top-left-radius: 10px;
 }
-.user-management button {
-  margin-bottom: 0;
-}
-.flex-direction-column {
-  flex-direction: column;
-}
+
 .last_name {
   position: relative;
   left: 5px;
