@@ -69,9 +69,10 @@ def download_file(
 ):
     file_record = db.query(File).filter(File.id == file_id).first()
     if not file_record:
-        raise HTTPException(status_code=404, detail="File not found.")
-    if file_record.person_id != user.id:
-        raise HTTPException(status_code=403, detail="Not allowed.")
+        raise HTTPException(status_code=404, detail="File not found.") 
+    if user.person_type != "employee":
+        if file_record.person_id != user.id:
+         raise HTTPException(status_code=403, detail="Not allowed.")
 
     headers = {"Content-Disposition": f'attachment; filename="{file_record.file_name}"'}
     return StreamingResponse(
