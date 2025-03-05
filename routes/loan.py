@@ -9,7 +9,11 @@ from datetime import datetime
 
 router = APIRouter()
 templates = Jinja2Templates(directory="templates")
-
+bonitaet_rating = LoanDecision.get_bonitaet_score()
+def validate_boni_score(boni_score):
+    if boni_score < 579:
+        raise ValueError("Ihr Bonitätsscore ist zu niedrig für eine Kreditvergabe.")
+    
 def validate_immediate_loan(loan_subtype, requested_amount, repayment_amount, term_in_years):
     if requested_amount > 40000:
         raise ValueError("Bei Sofortkrediten darf der angefragte Betrag 40.000 € nicht überschreiten.")
@@ -63,7 +67,7 @@ def loan_submit(
     db: Session = Depends(get_db)
 ):
     # Validate the loan constraints
-    try:
+    try:      
         if loan_type == "immediate":
             final_term = validate_immediate_loan(
                 loan_subtype,
@@ -78,6 +82,9 @@ def loan_submit(
                 term_in_years
             )
             type_str = "Baufinanzierung"
+            
+        if(loan_type == "immediate" or loan_type == "building"):
+            validate_boni_score(bonitaet_rating)
         else:
             raise ValueError("Ungültige Darlehensart.")
     except ValueError as e:
@@ -95,7 +102,7 @@ def loan_submit(
 
     dscr_value = LoanDecision.calculate_dscr(available_income, total_debt_payments)
     ccr_value = LoanDecision.calculate_ccr(collateral_value, total_outstanding_debt)
-    bonitaet_rating = LoanDecision.get_bonitaet_score()
+   
     decision_obj = LoanDecision(
         boni_score=bonitaet_rating,
         dscr=dscr_value,

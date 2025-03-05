@@ -19,6 +19,7 @@ class LoanDecision:
 
     @staticmethod
     def get_bonitaet_score() -> float:
+        random.seed(42)
         return round(random.uniform(0, 1000), 2)
 
     def evaluate(self):
