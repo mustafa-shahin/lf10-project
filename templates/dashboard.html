@@ -7,7 +7,7 @@
 {% macro search_bar(placeholder) %}
   <div class="input-group">
     <input type="search" placeholder="{{ placeholder }}">
-    <img src="{{ url_for('static_files', path='images/search.png') }}" alt="Search Icon">
+    <i class="fa-solid fa-magnifying-glass"></i>
   </div>
 {% endmacro %}
 

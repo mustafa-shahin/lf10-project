@@ -587,3 +587,8 @@ a {
 .header {
   margin: 0 25px;
 }
+.forgot_password {
+  button[type="submit"] {
+    margin-top: 10px;
+  }
+}
