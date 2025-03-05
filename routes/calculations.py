@@ -20,7 +20,8 @@ class LoanDecision:
     @staticmethod
     def get_bonitaet_score() -> float:
         random.seed(42)
-        return round(random.uniform(0, 1000), 2)
+        random_numbers = [round(random.uniform(550, 650), 2) for _ in range(5)]
+        return random.choice(random_numbers)
 
     def evaluate(self):
         if self.boni_score < 579:
