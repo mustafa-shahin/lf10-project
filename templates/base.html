@@ -11,8 +11,10 @@
   </head>
   <body>
     {% include "header.html" %}
-    <div class="wrapper flex-direction-column">
-      {% block content %} {% endblock %}
-    </div>
+    <main>
+      <div class="wrapper flex-direction-column">
+        {% block content %} {% endblock %}
+      </div>
+    </main>
   </body>
 </html>

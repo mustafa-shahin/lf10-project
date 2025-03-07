@@ -7,6 +7,8 @@ $color: #fff;
 $border-radius: 6px;
 $input-padding: 0.6rem;
 $input-border-color: #cccccc;
+$hover-color: #29fd53;
+$background-hover-color: #0f9b2a;
 
 @mixin transition($properties...) {
   transition: $properties;
@@ -35,6 +37,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  margin-top: 80px;
 }
 
 .flex {
@@ -89,7 +92,24 @@ form {
     font-weight: 600;
     display: block;
   }
+  input {
+    padding: $input-padding;
+    border-radius: $border-radius;
+    @include transition(border-color 0.2s, box-shadow 0.2s);
+    max-height: 60px;
+    background-color: $background-color;
+    border: 1px solid $input-border-color;
+    color: $color;
 
+    &:focus {
+      @include focus-style;
+    }
+
+    &:-internal-autofill-selected {
+      background-color: $background-color;
+      color: $color;
+    }
+  }
   input[type="text"],
   input[type="email"],
   input[type="password"],
@@ -244,44 +264,23 @@ a.btn {
   color: $color;
 }
 
-.logo-container {
-  width: fit-content;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-  .logo {
-    width: 150px;
-    height: 150px;
-    max-width: 150px;
-    border-radius: 50%;
-  }
-}
-
-.logout img,
-.user img {
-  width: 30px;
-  height: 30px;
-}
-
-.logout img {
-  position: relative;
-  top: 16px;
-}
-
 .user {
-  display: flex;
   flex-wrap: wrap;
   gap: 18px;
   align-items: center;
   position: relative;
-  top: -25px;
-  align-content: flex-start;
+  align-content: flex-end;
+  justify-content: flex-end;
+  div:hover,
+  a:hover {
+    i {
+      color: $hover-color;
+    }
+  }
 }
 
 .flex.user-info {
   position: relative;
-  top: 21px;
   align-items: center;
   justify-content: center;
 }
@@ -317,8 +316,9 @@ td {
   text-align: left;
 }
 
-main.table {
-  width: 90vw;
+#applications_table.table,
+#users_table.table {
+  width: 99vw;
   background-color: #0c293c;
   backdrop-filter: blur(7px);
   box-shadow: 0 0.4rem 0.8rem rgba(0, 0, 0, 0.3);
@@ -577,18 +577,47 @@ input:checked + .export__file-options {
 .table-body table {
   width: 100%;
 }
-.header > div {
-  margin-top: 16px;
-}
 
 a {
   color: #fff;
 }
 .header {
   margin: 0 25px;
+  justify-content: space-between;
+  position: relative;
 }
 .forgot_password {
   button[type="submit"] {
     margin-top: 10px;
+  }
+}
+.user.flex {
+  font-size: 25px;
+}
+i + small {
+  margin-top: 5px;
+}
+.header-menu {
+  li {
+    list-style: none;
+    padding: 0 20px;
+    a {
+      text-decoration: none;
+    }
+  }
+}
+a.active {
+  background-color: #096f28;
+  padding: 10px 15px;
+  border-radius: $border-radius;
+}
+.header-menu li:hover {
+  a:not(.active) {
+    color: $hover-color;
+    transition: 0.5s;
+  }
+  a.active {
+    background-color: $background-hover-color;
+    transition: 0.5s;
   }
 }

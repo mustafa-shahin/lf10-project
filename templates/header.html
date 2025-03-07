@@ -1,20 +1,47 @@
-<div class="header">
-   <div class="flex flex-space-between">
-    <div class="logo-container">
-      <a href="/">
-        <img src="/static/images/logo.jpg" alt="Logo" class="logo" />
-    </div>
+<div class="header flex flex-center">
+  <div class="logo-container">
+    <a href="/">
+      <img src="/static/images/logo1.png" alt="Logo" class="logo" />
     </a>
-    <div class="user flex">
-      {% if user %}
-      <div class="flex user-info flex-direction-column">
-        <img src="/static/icons/user.png" alt="User" />
-       <p>{{ user.first_name }}</p>
-      </div>
-      <a class="logout" href="/logout" style="float: right">
-        <img src="/static/icons/logout.png" alt="Logout" />
-      </a>
+  </div>
+  <div class="header-menu">
+    <ul class="flex">
+      <li>
+        <a href="/">Home</a>
+      </li>
+      <li>
+        <a
+          href="/dashboard"
+          class="{% if request.path.lstrip('/') == 'dashboard' %}active{% endif %}"
+          >Dashboard</a
+        >
+      </li>
+      <li>
+        <a href="/">Über uns</a>
+      </li>
+      {% if user.person_type == "customer" %}
+      <li>
+        <a
+          class="{% if request.path.lstrip('/') == 'loan' %}active{% endif %}"
+          href="/loan"
+          >Antrag erstellen</a
+        >
+      </li>
       {% endif %}
+      <li>
+        <a href="/">Kontakt</a>
+      </li>
+    </ul>
+  </div>
+  <div class="user flex">
+    {% if user %}
+    <div class="flex user-info flex-direction-column">
+      <i class="fa-solid fa-user"></i>
+      <!-- <small>{{ user.first_name }}</small> -->
     </div>
-   </div>
+    <a class="logout" href="/logout" style="float: right">
+      <i class="fa-solid fa-right-from-bracket"></i>
+    </a>
+    {% endif %}
+  </div>
 </div>
