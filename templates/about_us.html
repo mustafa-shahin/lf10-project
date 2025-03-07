@@ -1,0 +1,18 @@
+{% extends "base.html" %} {% block title %}Über uns{% endblock %} {% block
+content %}
+<div class="slider" id="slider"></div>
+
+<script>
+  const names = ["BY:", "JAKOB", "YASSIN", "PATRYK", "MUSTAFA"];
+  const slider = document.getElementById("slider");
+  const delayBetween = 1500;
+
+  names.forEach((name, index) => {
+    const slide = document.createElement("div");
+    slide.className = "slide";
+    slide.textContent = name;
+    slide.style.animationDelay = (index * delayBetween) / 1000 + "s";
+    slider.appendChild(slide);
+  });
+</script>
+{% endblock %}

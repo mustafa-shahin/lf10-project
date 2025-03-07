@@ -19,20 +19,21 @@ def get_db():
         yield db
     finally:
         db.close()
+
+
 def get_current_user(request: Request, db: Session = Depends(get_db)) -> Optional[Person]:
     session_id = request.cookies.get("session_id")
     if not session_id or session_id not in sessions:
         return None
-    person_id = sessions[session_id]
-    person = db.query(Person).filter(Person.id == person_id).first()
-    return person
+    person_id = sessions.get(session_id)
+    return db.query(Person).filter(Person.id == person_id).first()
+
 
 def require_login(request: Request, db: Session = Depends(get_db)) -> Person:
     user = get_current_user(request, db=db)
     if not user:
         raise HTTPException(status_code=302, headers={"Location": "/login"})
-    else:
-        return user
+    return user
 
 def create_session_cookie(response, person_id: int):
     session_id = str(uuid.uuid4())

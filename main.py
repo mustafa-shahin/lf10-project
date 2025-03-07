@@ -15,6 +15,7 @@ from routes.auth import router as auth_router
 from routes.dashboard import router as dashboard_router
 from routes.loan import router as loan_router
 from routes.files import router as files_router
+from routes.about_us import router as about_us_router
 # Absolute directories
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 SASS_IN = os.path.join(BASE_DIR, 'static', 'scss')
@@ -70,6 +71,7 @@ app.include_router(dashboard_router)
 app.include_router(loan_router)
 app.include_router(files_router)
 app.include_router(admin_router)
+app.include_router(about_us_router)
 
 
 @app.get("/", response_class=HTMLResponse)

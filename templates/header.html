@@ -12,17 +12,21 @@
       <li>
         <a
           href="/dashboard"
-          class="{% if request.path.lstrip('/') == 'dashboard' %}active{% endif %}"
+          class="{{ 'active' if request.path == '/dashboard' else '' }}"
           >Dashboard</a
         >
       </li>
       <li>
-        <a href="/">Über uns</a>
+        <a
+          href="/about_us"
+          class="{{ 'active' if request.path == '/about_us' else '' }}"
+          >Über uns</a
+        >
       </li>
       {% if user.person_type == "customer" %}
       <li>
         <a
-          class="{% if request.path.lstrip('/') == 'loan' %}active{% endif %}"
+          class="{{ 'active' if request.path == '/loan' else '' }}"
           href="/loan"
           >Antrag erstellen</a
         >
