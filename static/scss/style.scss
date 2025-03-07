@@ -325,6 +325,12 @@ td {
   border-radius: 0.8rem;
   overflow: hidden;
   margin-top: 36px;
+  .flex.flex-center {
+    button.btn {
+      margin-bottom: 0px;
+      margin-left: 20px;
+    }
+  }
 }
 
 .table__header {
@@ -398,11 +404,10 @@ td {
 }
 
 td img {
-  width: 36px;
   height: 36px;
   margin-right: 0.5rem;
-  border-radius: 50%;
   vertical-align: middle;
+  padding: 3px 3px;
 }
 
 thead th {
@@ -686,5 +691,22 @@ main {
         }
       }
     }
+  }
+}
+#fileList {
+  margin: 10px 0px;
+  li {
+    margin: 10px 0px;
+  }
+}
+.delete-btn {
+  margin-bottom: 0px;
+  margin-left: 20px;
+}
+ul.status-pending {
+  display: flex;
+  justify-content: space-between;
+  a {
+    text-decoration: none;
   }
 }

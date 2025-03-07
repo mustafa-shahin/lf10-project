@@ -9,7 +9,11 @@ block content %}
   enctype="multipart/form-data"
 >
   <input type="hidden" name="application_id" value="{{ application_id }}" />
-
+  <input
+    type="hidden"
+    name="person_identifier"
+    value="{{ person_identifier }}"
+  />
   <label for="files" class="custom-file-upload btn margin-0">
     Datei auswählen (Bilder oder PDFs)
   </label>

@@ -28,7 +28,8 @@ def get_upload(
             "request": request,
             "person_identifier": user.id,
             "application_id": application_id,
-            "temp_files": files
+            "temp_files": files, 
+            "user": user
         }
     )
 

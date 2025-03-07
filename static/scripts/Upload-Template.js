@@ -11,7 +11,7 @@ function getFileIcon(filenameOrType) {
  */
 function createFileListItem(fileData) {
   const filename = fileData.file_name || fileData.name || "unnamed_file";
-  const downloadUrl = fileData.download_url || "#";
+  const downloadUrl = "/download/" + fileData.id || "#";
 
   const fileLink = document.createElement("a");
   fileLink.classList.add("flex", "flex-center", "no-link-style");

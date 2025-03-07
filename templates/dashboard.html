@@ -62,14 +62,33 @@
                   <td>{{ app.decided_at }}</td>
                   <td>
                     {% if app.files %}
-                      <ul>
-                        {% for f in app.files %}
-                          <li><a href="/download/{{ f.id }}">{{ f.file_name }}</a></li>
-                        {% endfor %}
-                      </ul>
-                    {% else %}
-                      Keine Dateien
-                    {% endif %}
+                    <ul class="status-{{ app.status_class }}">
+                      {% for f in app.files %}
+                        <li>
+                          {% if f.file_type.startswith('image/') %}
+                          <img src="/static/icons/photo.png" alt="icons"  />
+                        {% else %}
+                           <img src="/static/icons/pdf.png" alt="icons"  />
+                        {% endif %}                 
+                          <a href="/download/{{ f.id }}">{{ f.file_name }}</a>
+                        </li>
+                      {% endfor %}
+                      {% if app.status == "in bearbeitung" %}
+                      <form action="/upload" class="flex-center upload-form ">
+                        <input type="hidden" name="application_id" value="{{ app.id }}">
+                        <button class="btn" type="submit">Dateien hochladen</button>
+                      </form>
+                      {% endif %}
+                    </ul>
+                  {% else %}
+                    <div class="flex flex-center flex-space-between">
+                      <span>Keine Dateien</span>
+                      <form action="/upload" class="flex-center upload-form">
+                        <input type="hidden" name="application_id" value="{{ app.id }}">
+                        <button class="btn" type="submit">Dateien hochladen</button>
+                      </form>
+                    </div>
+                  {% endif %}
                   </td>
                   {% if user.person_type == "employee" %}
                     <td>

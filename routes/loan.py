@@ -28,6 +28,8 @@ def validate_immediate_loan(loan_subtype, requested_amount, repayment_amount, te
     else:
         if term_in_years <= 0:
             raise ValueError("Bitte geben Sie eine gültige Laufzeit ein.")
+        elif term_in_years > 5:
+            raise ValueError("Die Laufzeit für ein Annuitätendarlehen darf 5 Jahre nicht überschreiten.")
         return term_in_years
 
 def validate_building_loan(loan_subtype, term_in_years):
@@ -40,13 +42,15 @@ def validate_building_loan(loan_subtype, term_in_years):
     return term_in_years
 
 @router.get("/loan", response_class=HTMLResponse)
-def get_loan_form(request: Request, user: Person = Depends(require_login)):
+def get_loan_form(request: Request, user: Person = Depends(require_login), loan_type: str = None):
     return templates.TemplateResponse(
         "loan.html",
         {
             "request": request,
             "person_identifier": user.id,
-            "user": user
+            "user": user,
+              "loan_type": loan_type
+            
         }
     )
 
