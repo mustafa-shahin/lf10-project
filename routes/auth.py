@@ -75,7 +75,7 @@ def post_register(
     session_id = str(uuid.uuid4())
     sessions[session_id] = new_person.id
 
-    response = RedirectResponse(url="/dashboard", status_code=303)
+    response = RedirectResponse(url="/", status_code=303)
     response.set_cookie(key="session_id", value=session_id, httponly=True)
     return response
 
@@ -105,13 +105,13 @@ def post_login(
         )
 
     # Create session
-    response = RedirectResponse(url="/dashboard", status_code=303)
+    response = RedirectResponse(url="/", status_code=303)
     create_session_cookie(response, person.id)
     return response
 
 @router.get("/logout")
 def logout(request: Request):
-    response = RedirectResponse(url="/login", status_code=303)
+    response = RedirectResponse(url="/", status_code=303)
     clear_session_cookie(response, request)
     return response
 

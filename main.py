@@ -16,7 +16,10 @@ from routes.dashboard import router as dashboard_router
 from routes.loan import router as loan_router
 from routes.files import router as files_router
 from routes.about_us import router as about_us_router
-# Absolute directories
+from routes.home import router as home_router
+
+
+
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 SASS_IN = os.path.join(BASE_DIR, 'static', 'scss')
 SASS_OUT = os.path.join(BASE_DIR, 'static', 'css')
@@ -72,12 +75,20 @@ app.include_router(loan_router)
 app.include_router(files_router)
 app.include_router(admin_router)
 app.include_router(about_us_router)
+app.include_router(home_router)
 
 
+# @app.get("/", response_class=HTMLResponse)
+# def root(request: Request, db: Session = Depends(get_db)):
+#     user = get_current_user(request, db)
+#     if user:
+#         return RedirectResponse(url="/dashboard")
+#     else:
+#         return RedirectResponse(url="/home")
 @app.get("/", response_class=HTMLResponse)
 def root(request: Request, db: Session = Depends(get_db)):
     user = get_current_user(request, db)
-    if user:
+    if user and user.person_type in ["admin", "employee"]:
         return RedirectResponse(url="/dashboard")
-    else:
-        return RedirectResponse(url="/login")
+    return RedirectResponse(url="/home")  
+    

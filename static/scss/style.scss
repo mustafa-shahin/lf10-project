@@ -7,8 +7,8 @@ $color: #fff;
 $border-radius: 6px;
 $input-padding: 0.6rem;
 $input-border-color: #cccccc;
-$hover-color: #29fd53;
-$background-hover-color: #0f9b2a;
+$hover-color: #dbc64c;
+$background-hover-color: #968215;
 
 @mixin transition($properties...) {
   transition: $properties;
@@ -582,7 +582,7 @@ a {
   color: #fff;
 }
 .header {
-  margin: 0 25px;
+  margin: 20px 25px;
   justify-content: space-between;
   position: relative;
 }
@@ -607,7 +607,7 @@ i + small {
   }
 }
 a.active {
-  background-color: #096f28;
+  background-color: #a38d0a;
   padding: 10px 15px;
   border-radius: $border-radius;
 }
@@ -651,4 +651,40 @@ a.active {
 }
 main {
   height: 100vh;
+}
+
+.home-title {
+  width: 100%;
+  float: left;
+  font-size: 40px;
+  font-weight: bold;
+  padding: 0px;
+  margin-bottom: 20px;
+}
+
+/// background-color: #896d13;
+.container {
+  gap: 100px;
+  .box_main {
+    align-items: center;
+    gap: 10px;
+    i {
+      font-size: 75px;
+      &:hover {
+        color: $hover-color;
+      }
+    }
+    h1 {
+      margin-top: 10px;
+    }
+    a {
+      text-decoration: none;
+      &:hover {
+        i,
+        h1 {
+          color: $hover-color;
+        }
+      }
+    }
+  }
 }

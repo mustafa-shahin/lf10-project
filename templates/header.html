@@ -7,7 +7,9 @@
   <div class="header-menu">
     <ul class="flex">
       <li>
-        <a href="/">Home</a>
+        <a href="/" class="{{ 'active' if request.path == '/home' else '' }}"
+          >Home</a
+        >
       </li>
       <li>
         <a
@@ -41,10 +43,13 @@
     {% if user %}
     <div class="flex user-info flex-direction-column">
       <i class="fa-solid fa-user"></i>
-      <!-- <small>{{ user.first_name }}</small> -->
     </div>
     <a class="logout" href="/logout" style="float: right">
       <i class="fa-solid fa-right-from-bracket"></i>
+    </a>
+    {% else %}
+    <a class="login" href="/login" style="float: right">
+      <i class="fa-solid fa-lock"></i>
     </a>
     {% endif %}
   </div>
