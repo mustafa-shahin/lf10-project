@@ -25,7 +25,7 @@
           >Über uns</a
         >
       </li>
-      {% if user.person_type == "customer" %}
+      {% if user is not none %} {% if user.person_type == "customer" %}
       <li>
         <a
           class="{{ 'active' if request.path == '/loan' else '' }}"
@@ -33,7 +33,7 @@
           >Antrag erstellen</a
         >
       </li>
-      {% endif %}
+      {% endif %} {% endif %}
       <li>
         <a href="/">Kontakt</a>
       </li>

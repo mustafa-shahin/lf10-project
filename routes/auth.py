@@ -14,7 +14,7 @@ router = APIRouter()
 
 @router.get("/register", response_class=HTMLResponse)
 def get_register(request: Request):
-    return templates.TemplateResponse("register.html", {"request": request})
+    return templates.TemplateResponse("register.html", {"request": request, "user": None})
 
 @router.post("/register", response_class=HTMLResponse)
 def post_register(
