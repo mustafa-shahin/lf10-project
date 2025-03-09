@@ -37,7 +37,7 @@ def post_register(
     if existing:
         return templates.TemplateResponse(
             "register.html",
-            {"request": request, "error": "Email already in use."}
+            {"request": request, "error": "Email already in use." , "user": None}
         )
 
     # Count how many users we already have
