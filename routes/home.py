@@ -19,7 +19,12 @@ def optional_login(db: Session = Depends(get_db)) -> Optional[Person]:
 @router.get("/home", response_class=HTMLResponse)
 def get_about_us(
     request: Request,
-    user: Optional[Person] = Depends(get_current_user) 
+    user: Optional[Person] = Depends(get_current_user),
+    db: Session = Depends(get_db) 
 ):
-    return templates.TemplateResponse("home.html", {"request": request, "user": user})
+    person = get_current_user(request, db)
+    if person:
+       return templates.TemplateResponse("home.html", {"request": request, "user": person})
+    else:
+        return templates.TemplateResponse("home.html", {"request": request, "user": None})
 

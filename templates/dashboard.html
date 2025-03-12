@@ -61,7 +61,7 @@
                   <td>{{ app.created_at }}</td>
                   <td>{{ app.decided_at }}</td>
                   <td>
-                    {% if app.files %}
+                    {% if app.files  %}
                     <ul class="status-{{ app.status_class }}">
                       {% for f in app.files %}
                         <li class="flex items-center">
@@ -73,7 +73,7 @@
                           <a href="/download/{{ f.id }}">{{ f.file_name | truncate(20, True, '...') }}</a>
                         </li>
                       {% endfor %}
-                      {% if app.status == "in bearbeitung" %}
+                      {% if app.status == "in bearbeitung" and user.person_type == "customer" %}
                       <form action="/upload" class="flex-center upload-form ">
                         <input type="hidden" name="application_id" value="{{ app.id }}">
                         <button class="btn" type="submit">Dateien hochladen</button>
@@ -81,13 +81,16 @@
                       {% endif %}
                     </ul>
                   {% else %}
+                  
                     <div class="flex flex-center flex-space-between">
                       <span>Keine Dateien</span>
+                      {%if user.person_type == "customer"%}
                       <form action="/upload" class="flex-center upload-form">
                         <input type="hidden" name="application_id" value="{{ app.id }}">
                         <button class="btn" type="submit">Dateien hochladen</button>
                       </form>
                     </div>
+                    {% endif %}
                   {% endif %}
                   </td>
                   {% if user.person_type == "employee" %}
