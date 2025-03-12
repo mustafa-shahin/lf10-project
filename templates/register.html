@@ -1,94 +1,102 @@
 {% extends "base.html" %} {% block title %}Register{% endblock %} {% block
 content %}
 
-<h1>Registerierung</h1>
+<h1 class="text-center">Registerierung</h1>
 {% if error %}
 <p style="color: red">{{ error }}</p>
 {% endif %}
 
-<form method="post" action="/register" class="register-form">
-  <label for="salutation">Anrede</label>
-  <select name="salutation" required>
-    <option value="">-- please select --</option>
-    <option value="Herr">Herr</option>
-    <option value="Frau">Frau</option>
-    <option value="Diverse">Diverse</option>
-  </select>
-  <label for="title">Title</label>
-  <input class="login-register-inputs" type="text" name="title" />
-  <div class="flex">
-    <div class="first_name">
-      <label for="first_name">First Name</label>
+<form method="post" action="/register" class="register-form max-w-xl mx-auto">
+  <div class="mx-6">
+    <label for="salutation">Anrede</label>
+    <select class="w-full" name="salutation" required>
+      <option value="">-- please select --</option>
+      <option value="Herr">Herr</option>
+      <option value="Frau">Frau</option>
+      <option value="Diverse">Diverse</option>
+    </select>
+    <label for="title">Title</label>
+    <input class="login-register-inputs" type="text" name="title" />
+    <div class="flex justify-between">
+      <div class="first_name w-[48%]">
+        <label for="first_name">First Name</label>
+        <input
+          class="login-register-inputs"
+          class="login-register-inputs"
+          type="text"
+          name="first_name"
+          required
+        />
+      </div>
+      <div class="last_name w-[48%]">
+        <label for="second_name">Last Name</label>
+        <input
+          class="login-register-inputs"
+          type="text"
+          name="second_name"
+          required
+        />
+      </div>
+    </div>
+
+    <div class="street">
+      <label for="street">Street</label>
+      <input class="login-register-inputs" type="text" name="street" required />
+    </div>
+
+    <div class="house_number">
+      <label for="house_number">Haus Nr.</label>
       <input
         class="login-register-inputs"
-        class="login-register-inputs"
         type="text"
-        name="first_name"
+        name="house_number"
         required
       />
     </div>
-    <div class="last_name">
-      <label for="second_name">Last Name</label>
+
+    <div class="zip">
+      <label for="zip_code">ZIP</label>
       <input
         class="login-register-inputs"
         type="text"
-        name="second_name"
+        name="zip_code"
         required
       />
     </div>
-  </div>
 
-  <div class="street">
-    <label for="street">Street</label>
-    <input class="login-register-inputs" type="text" name="street" required />
-  </div>
+    <div class="city">
+      <label for="city">Stadt</label>
+      <input class="login-register-inputs" type="text" name="city" required />
+    </div>
 
-  <div class="house_number">
-    <label for="house_number">Haus Nr.</label>
-    <input
-      class="login-register-inputs"
-      type="text"
-      name="house_number"
-      required
-    />
-  </div>
+    <div class="country">
+      <label for="country">Land</label>
+      <input type="text" name="country" required />
+    </div>
 
-  <div class="zip">
-    <label for="zip_code">ZIP</label>
-    <input class="login-register-inputs" type="text" name="zip_code" required />
-  </div>
+    <div class="email">
+      <label for="email">Email</label>
+      <input class="login-register-inputs" type="email" name="email" required />
+    </div>
 
-  <div class="city">
-    <label for="city">Stadt</label>
-    <input class="login-register-inputs" type="text" name="city" required />
+    <div class="password">
+      <label for="password">Passwort</label>
+      <input
+        class="login-register-inputs"
+        class="login-register-inputs"
+        type="password"
+        name="password"
+        id="password"
+        required
+      />
+    </div>
+    <div class="flex justify-between"">
+      <button class="btn" type="submit">Registrieren</button>
+      <button class="btn" type="button" onclick="window.location.href='login';">
+        <i class="fa-solid fa-lock"></i>
+        <span>Anmelden</span>
+      </button>
+    </div>
   </div>
-
-  <div class="country">
-    <label for="country">Land</label>
-    <input type="text" name="country" required />
-  </div>
-
-  <div class="email">
-    <label for="email">Email</label>
-    <input class="login-register-inputs" type="email" name="email" required />
-  </div>
-
-  <div class="password">
-    <label for="password">Passwort</label>
-    <input
-      class="login-register-inputs"
-      class="login-register-inputs"
-      type="password"
-      name="password"
-      id="password"
-      required
-    />
-  </div>
-
-  <button class="btn" type="submit">Registrieren</button>
-  <button class="btn" type="button" onclick="window.location.href='login';">
-    <i class="fa-solid fa-lock"></i>
-    <span>Anmelden</span>
-  </button>
 </form>
 {% endblock %}
