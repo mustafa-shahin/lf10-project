@@ -175,10 +175,29 @@
           </div>
         </div>
       </div>
+
+      </li>
+      {% if user is not none %} {% if user.person_type == "customer" %}
+      <li>
+        <a
+          class="{{ 'active' if request.path == '/loan' else '' }}"
+          href="/loan"
+          >Antrag erstellen</a
+        >
+      </li>
+      {% endif %} {% endif %}
+      <li>
+        <a href="/">Kontakt</a>
+      </li>
+    </ul>
+  </div>
+  <div class="user flex">
+    {% if user %}
+    <div class="flex user-info flex-direction-column">
+      <i class="fa-solid fa-user"></i>
+
     </div>
   </div>
-
-  <!-- Script for Mobile Menu Toggle -->
   <script>
     const mobileMenu = document.getElementById("mobile-menu");
     const mobileMenuOpen = document.getElementById("mobile-menu-open");
