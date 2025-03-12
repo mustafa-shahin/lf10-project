@@ -64,13 +64,13 @@
                     {% if app.files %}
                     <ul class="status-{{ app.status_class }}">
                       {% for f in app.files %}
-                        <li>
+                        <li class="flex items-center">
                           {% if f.file_type.startswith('image/') %}
                           <img src="/static/icons/photo.png" alt="icons"  />
                         {% else %}
                            <img src="/static/icons/pdf.png" alt="icons"  />
                         {% endif %}                 
-                          <a href="/download/{{ f.id }}">{{ f.file_name }}</a>
+                          <a href="/download/{{ f.id }}">{{ f.file_name | truncate(20, True, '...') }}</a>
                         </li>
                       {% endfor %}
                       {% if app.status == "in bearbeitung" %}
