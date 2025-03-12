@@ -1,29 +1,181 @@
-<div class="header flex flex-center">
-  <div class="logo-container">
-    <a href="/">
-      <img src="/static/images/logo1.png" alt="Logo" class="logo" />
-    </a>
-  </div>
-  <div class="header-menu">
-    <ul class="flex">
-      <li>
-        <a href="/" class="{{ 'active' if request.path == '/home' else '' }}"
-          >Home</a
+<header>
+  <nav
+    class="mx-auto flex items-center justify-between p-6 lg:px-8"
+    aria-label="Global"
+  >
+    <!-- Logo -->
+    <div class="flex lg:flex-1">
+      <a href="/" class="-m-1.5 p-1.5">
+        <span class="sr-only">Your Company</span>
+        <img class="" src="/static/images/logo1.png" alt="Logo" />
+      </a>
+    </div>
+
+    <!-- Mobile Menu Open Button -->
+    <div class="lg:flex lg:hidden">
+      <button
+        id="mobile-menu-open"
+        type="button"
+        class="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-gray-700"
+      >
+        <span class="sr-only">Open main menu</span>
+        <svg
+          class="h-6 w-6"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke-width="1.5"
+          stroke="white"
+          aria-hidden="true"
         >
-      </li>
-      <li>
-        <a
-          href="/dashboard"
-          class="{{ 'active' if request.path == '/dashboard' else '' }}"
-          >Dashboard</a
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M3.75 6.75h16.5M3.75 12h16.5M3.75 17.25h16.5"
+          />
+        </svg>
+      </button>
+    </div>
+
+    <!-- Desktop Navigation -->
+    <div class="hidden lg:flex lg:gap-x-12 items-center">
+      <a
+        href="/"
+        class="text-sm/6 font-semibold text-white {{ 'active' if request.path == '/home' else '' }}"
+        >Home</a
+      >
+      <a
+        href="/dashboard"
+        class="text-sm/6 font-semibold text-white {{ 'active' if request.path == '/dashboard' else '' }}"
+        >Dashboard</a
+      >
+      <a
+        href="/about_us"
+        class="text-sm/6 font-semibold text-white {{ 'active' if request.path == '/about_us' else '' }}"
+        >Über uns</a
+      >
+      {% if user.person_type == "customer" %}
+      <a
+        href="/loan"
+        class="text-sm/6 font-semibold text-white {{ 'active' if request.path == '/loan' else '' }}"
+        >Antrag erstellen</a
+      >
+      {% endif %}
+      <a href="/" class="text-sm/6 font-semibold text-white">Kontakt</a>
+    </div>
+
+    <!-- User Login / Logout -->
+    <div class="hidden lg:flex lg:flex-1 lg:justify-end">
+      {% if user %}
+      <div class="flex items-center gap-x-4">
+        <a class="text-sm/6 font-semibold text-white">
+          <i class="fa-solid fa-user text-[25px]"></i>
+        </a>
+
+        <a class="text-sm/6 font-semibold text-white" href="/logout">
+          <i class="fa-solid fa-right-from-bracket text-[25px]"></i>
+        </a>
+      </div>
+      {% else %}
+      <a
+        class="text-sm/6 font-semibold text-wh {{ 'active' if request.path == '/login' else '' }}"
+        href="/login"
+      >
+        <i class="fa-solid fa-lock text-[25px]"></i>
+      </a>
+      {% endif %}
+    </div>
+  </nav>
+
+  <!-- Mobile Navigation Menu -->
+  <!-- The mobile menu is initially off-screen via "translate-x-full" and slides in when open -->
+  <div
+    id="mobile-menu"
+    class="lg:hidden fixed inset-0 z-10 transform translate-x-full transition-transform duration-300 ease-in-out"
+    role="dialog"
+    aria-modal="true"
+  >
+    <!-- Background backdrop -->
+    <div class="fixed inset-0 bg-black opacity-50"></div>
+    <div
+      class="fixed inset-y-0 right-0 z-10 w-full overflow-y-auto px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-gray-900/10 res-menu"
+    >
+      <div class="flex justify-end">
+        <button
+          id="mobile-menu-close"
+          type="button"
+          class="-m-2.5 rounded-md p-2.5 text-gray-700"
         >
-      </li>
-      <li>
-        <a
-          href="/about_us"
-          class="{{ 'active' if request.path == '/about_us' else '' }}"
-          >Über uns</a
-        >
+          <span class="sr-only">Close menu</span>
+          <svg
+            class="h-6 w-6"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke="currentColor"
+            aria-hidden="true"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M6 18 18 6M6 6l12 12"
+            />
+          </svg>
+        </button>
+      </div>
+      <div class="mt-6 flow-root">
+        <div class="-my-6 divide-y divide-gray-500/10">
+          <div class="space-y-2 py-6">
+            <a
+              href="/"
+              class="block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 hover:text-[#a38d0a] {{ 'active' if request.path == '/home' else '' }}"
+              >Home</a
+            >
+            <a
+              href="/dashboard"
+              class="block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 hover:text-[#a38d0a] {{ 'active' if request.path == '/dashboard' else '' }}"
+              >Dashboard</a
+            >
+            <a
+              href="/about_us"
+              class="block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 hover:text-[#a38d0a] {{ 'active' if request.path == '/about_us' else '' }}"
+              >Über uns</a
+            >
+            {% if user.person_type == "customer" %}
+            <a
+              href="/loan"
+              class="block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 hover:text-[#a38d0a] {{ 'active' if request.path == '/loan' else '' }}"
+              >Antrag erstellen</a
+            >
+            {% endif %}
+            <a
+              href="/"
+              class="block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 hover:text-[#a38d0a]"
+              >Kontakt</a
+            >
+          </div>
+          <div class="py-6">
+            {% if user %}
+            <div class="flex items-center gap-x-4">
+              <i class="fa-solid fa-user"></i>
+              <a
+                class="block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 hover:text-[#a38d0a]"
+                href="/logout"
+              >
+                <i class="fa-solid fa-right-from-bracket"></i>
+              </a>
+            </div>
+            {% else %}
+            <a
+              class="block rounded-lg px-3 py-2.5 text-base/7 font-semibold text-gray-900 hover:text-[#a38d0a] {{ 'active' if request.path == '/login' else '' }}"
+              href="/login"
+            >
+              <i class="fa-solid fa-lock"></i>Login
+            </a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
       </li>
       {% if user is not none %} {% if user.person_type == "customer" %}
       <li>
@@ -43,14 +195,20 @@
     {% if user %}
     <div class="flex user-info flex-direction-column">
       <i class="fa-solid fa-user"></i>
+
     </div>
-    <a class="logout" href="/logout" style="float: right">
-      <i class="fa-solid fa-right-from-bracket"></i>
-    </a>
-    {% else %}
-    <a class="login" href="/login" style="float: right">
-      <i class="fa-solid fa-lock"></i>
-    </a>
-    {% endif %}
   </div>
-</div>
+  <script>
+    const mobileMenu = document.getElementById("mobile-menu");
+    const mobileMenuOpen = document.getElementById("mobile-menu-open");
+    const mobileMenuClose = document.getElementById("mobile-menu-close");
+
+    mobileMenuOpen.addEventListener("click", function () {
+      mobileMenu.classList.remove("translate-x-full");
+    });
+
+    mobileMenuClose.addEventListener("click", function () {
+      mobileMenu.classList.add("translate-x-full");
+    });
+  </script>
+</header>

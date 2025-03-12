@@ -87,8 +87,5 @@ app.include_router(home_router)
 #         return RedirectResponse(url="/home")
 @app.get("/", response_class=HTMLResponse)
 def root(request: Request, db: Session = Depends(get_db)):
-    user = get_current_user(request, db)
-    if user and user.person_type in ["admin", "employee"]:
-        return RedirectResponse(url="/dashboard")
     return RedirectResponse(url="/home")  
     

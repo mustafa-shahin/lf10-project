@@ -11,9 +11,9 @@
   </div>
 {% endmacro %}
 {% if user.person_type != "admin" %}
-<h1 class="title">Dashboard</h1>
+<h1 class="title text-center">Dashboard</h1>
   {% set header_text = "Anträge" if user.person_type == "customer" else "Kreditanträge" %}
-    <div class="table" id="applications_table" >
+    <div  id="applications_table" >
       <section class="table__header">
         <h1>{{ header_text }}</h1>
         {{ search_bar("Suche...") }}
@@ -61,19 +61,19 @@
                   <td>{{ app.created_at }}</td>
                   <td>{{ app.decided_at }}</td>
                   <td>
-                    {% if app.files %}
+                    {% if app.files  %}
                     <ul class="status-{{ app.status_class }}">
                       {% for f in app.files %}
-                        <li>
+                        <li class="flex items-center">
                           {% if f.file_type.startswith('image/') %}
                           <img src="/static/icons/photo.png" alt="icons"  />
                         {% else %}
                            <img src="/static/icons/pdf.png" alt="icons"  />
                         {% endif %}                 
-                          <a href="/download/{{ f.id }}">{{ f.file_name }}</a>
+                          <a href="/download/{{ f.id }}">{{ f.file_name | truncate(20, True, '...') }}</a>
                         </li>
                       {% endfor %}
-                      {% if app.status == "in bearbeitung" %}
+                      {% if app.status == "in bearbeitung" and user.person_type == "customer" %}
                       <form action="/upload" class="flex-center upload-form ">
                         <input type="hidden" name="application_id" value="{{ app.id }}">
                         <button class="btn" type="submit">Dateien hochladen</button>
@@ -81,13 +81,16 @@
                       {% endif %}
                     </ul>
                   {% else %}
+                  
                     <div class="flex flex-center flex-space-between">
                       <span>Keine Dateien</span>
+                      {%if user.person_type == "customer"%}
                       <form action="/upload" class="flex-center upload-form">
                         <input type="hidden" name="application_id" value="{{ app.id }}">
                         <button class="btn" type="submit">Dateien hochladen</button>
                       </form>
                     </div>
+                    {% endif %}
                   {% endif %}
                   </td>
                   {% if user.person_type == "employee" %}
@@ -124,8 +127,8 @@
     </div>
     <script src="{{ url_for('static_files', path='scripts/script.js') }}"></script>
 {% elif user.person_type == "admin" %}
-<h1 class="title">Dashboard</h1>   
-    <div class="table" id="users_table">     
+<h1 class="title text-center">Dashboard</h1>   
+    <div  id="users_table">     
        <section class="table__header">
       <h1>Benutzerverwaltung</h1>
       {{ search_bar("Suche...") }}

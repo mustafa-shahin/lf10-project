@@ -20,12 +20,6 @@ $background-hover-color: #968215;
   box-shadow: 0 0 3px rgba($input-border-color, 0.5);
 }
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
 body {
   min-height: 100vh;
   font-family: $font-stack;
@@ -34,15 +28,9 @@ body {
 }
 
 .wrapper {
-  display: flex;
-  align-items: center;
-  justify-content: center;
   margin-top: 80px;
 }
 
-.flex {
-  display: flex;
-}
 .flex-center {
   align-items: center;
 }
@@ -61,7 +49,7 @@ body {
 .margin-0 {
   margin: 0;
 }
-.hidden {
+.hiddenn {
   display: none;
 }
 .no-list-style {
@@ -234,6 +222,9 @@ form {
   text-align: center;
   margin-bottom: 1rem;
   @include transition(background-color 0.2s);
+  &:hover {
+    background-color: $hover-color;
+  }
 }
 
 .btn {
@@ -316,15 +307,17 @@ td {
   text-align: left;
 }
 
-#applications_table.table,
-#users_table.table {
-  width: 99vw;
+#applications_table,
+#users_table {
   background-color: #0c293c;
   backdrop-filter: blur(7px);
   box-shadow: 0 0.4rem 0.8rem rgba(0, 0, 0, 0.3);
   border-radius: 0.8rem;
   overflow: hidden;
   margin-top: 36px;
+  max-width: 95%;
+  margin-left: auto;
+  margin-right: auto;
   .flex.flex-center {
     button.btn {
       margin-bottom: 0px;
@@ -709,4 +702,14 @@ ul.status-pending {
   a {
     text-decoration: none;
   }
+}
+.res-menu {
+  background-color: $background-color;
+}
+.home-container {
+  width: 100%;
+  max-width: unset;
+}
+header a:not(.active):hover {
+  color: $hover-color;
 }
