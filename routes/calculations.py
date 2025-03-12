@@ -10,11 +10,13 @@ class LoanDecision:
         self.reason = None
 
     @staticmethod
-    def calculate_dscr(available_income: float, total_debt_payments: float) -> float:
-        return available_income / total_debt_payments if total_debt_payments > 0 else 0.0
+    def calculate_dscr(available_income: float, total_debt_payments: float, requested_amount:float, term_in_years:int ) -> float:
+        total_debt_payments += requested_amount / term_in_years
+        return available_income * 12/ total_debt_payments if total_debt_payments > 0 else 0.0
 
     @staticmethod
-    def calculate_ccr(collateral_value: float, total_outstanding_debt: float) -> float:
+    def calculate_ccr(collateral_value: float, total_outstanding_debt: float,requested_amount:float) -> float:
+        total_outstanding_debt  += requested_amount 
         return collateral_value / total_outstanding_debt if total_outstanding_debt > 0 else 0.0
 
     @staticmethod

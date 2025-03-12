@@ -92,8 +92,8 @@ def loan_submit(
         )
 
     if loan_type == "Baudarlehen":
-        dscr_value = LoanDecision.calculate_dscr(available_income, total_debt_payments)
-        ccr_value = LoanDecision.calculate_ccr(collateral_value, total_outstanding_debt)
+        dscr_value = LoanDecision.calculate_dscr(available_income, total_debt_payments, requested_amount, final_term)
+        ccr_value = LoanDecision.calculate_ccr(collateral_value, total_outstanding_debt, requested_amount)
     else:
         dscr_value = 0.0
         ccr_value = 0.0
