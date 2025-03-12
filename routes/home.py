@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from typing import Optional
 from models import Person
 from routes.utils import get_db, require_login, get_current_user
-
+from fastapi.responses import RedirectResponse
 router = APIRouter()
 templates = Jinja2Templates(directory="templates")
 
@@ -23,8 +23,12 @@ def get_about_us(
     db: Session = Depends(get_db) 
 ):
     person = get_current_user(request, db)
+    
     if person:
-       return templates.TemplateResponse("home.html", {"request": request, "user": person})
-    else:
-        return templates.TemplateResponse("home.html", {"request": request, "user": None})
+        if person.person_type == "customer":
+            return templates.TemplateResponse("home.html", {"request": request, "user": person})
+        else:
+            return RedirectResponse(url="/dashboard", status_code=302)
+
+    return templates.TemplateResponse("home.html", {"request": request, "user": None})
 
