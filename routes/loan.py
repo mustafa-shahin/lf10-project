@@ -22,6 +22,10 @@ def validate_boni_score(boni_score):
     if boni_score < 579:
         raise ValueError("Ihr Bonitätsscore ist zu niedrig für eine Kreditvergabe.")
 
+def validate_dscr_score(dscr_score):
+    if dscr_score < 1:
+        raise ValueError("Ihr DSCR Score ist zu niedrig für eine Kreditvergabe.")
+
 def validate_immediate_loan(loan_subtype, requested_amount, repayment_amount, term_in_years):
     if requested_amount > 40000:
         raise ValueError("Bei Sofortkrediten darf der angefragte Betrag 40.000 € nicht überschreiten.")
@@ -98,7 +102,12 @@ def loan_submit(
         else:
             raise ValueError("Ungültige Darlehensart.")
 
+        dscr_value = LoanDecision.calculate_dscr(available_income, total_debt_payments, requested_amount, final_term)
+        ccr_value = LoanDecision.calculate_ccr(collateral_value, total_outstanding_debt, requested_amount)
+
         validate_boni_score(bonitaet_rating)
+        validate_dscr_score(dscr_value)
+
     except ValueError as e:
         logger.warning(f"Loan application validation failed for user {user.id}: {str(e)}")
         return templates.TemplateResponse(
@@ -115,10 +124,7 @@ def loan_submit(
         # Validate required fields for building loans
         if not all([available_income, total_debt_payments, collateral_value, total_outstanding_debt]):
             logger.warning(f"Missing required fields for building loan by user {user.id}")
-            raise HTTPException(status_code=400, detail="Alle Felder für eine Baufinanzierung müssen ausgefüllt sein")
-            
-        dscr_value = LoanDecision.calculate_dscr(available_income, total_debt_payments, requested_amount, final_term)
-        ccr_value = LoanDecision.calculate_ccr(collateral_value, total_outstanding_debt, requested_amount)
+            raise HTTPException(status_code=400, detail="Alle Felder für eine Baufinanzierung müssen ausgefüllt sein")           
     else:
         dscr_value = 0.0
         ccr_value = 0.0

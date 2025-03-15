@@ -137,7 +137,6 @@ def root(request: Request, db: Session = Depends(get_db)):
 
 @app.exception_handler(404)
 async def not_found_exception_handler(request: Request, exc):
-    """Custom 404 error handler"""
     logger.warning(f"404 error for URL: {request.url}")
     return templates.TemplateResponse(
         "error.html", 
@@ -156,7 +155,6 @@ async def server_error_exception_handler(request: Request, exc):
 # Add middleware to log all requests
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
-    """Log all incoming requests and their cookies"""
     logger.debug(f"Request: {request.method} {request.url}")
     
     # Log cookies (partially redacted for security)
