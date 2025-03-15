@@ -1,16 +1,16 @@
-from fastapi import APIRouter, Request, Depends, Form
+from fastapi import APIRouter, Request, Depends, Form, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from datetime import datetime
 
-from routes.utils import get_db, require_login, send_email
+from routes.utils import get_db, require_login
 from models import Application, Person
+from services.email_service  import email_service
 
 router = APIRouter()
 templates = Jinja2Templates(directory="templates")
 
-@router.get("/dashboard", response_class=HTMLResponse)
 @router.get("/dashboard", response_class=HTMLResponse)
 def get_dashboard(
     request: Request,
@@ -66,7 +66,7 @@ def get_dashboard(
             "person_type": u.person_type,
             "person_class": user_class_mapping.get(u.person_type, "unknown")  # Precomputed class
         })
-
+        
     return templates.TemplateResponse(
         "dashboard.html",
         {
@@ -86,33 +86,41 @@ def process_loan_decision(
     user: Person = Depends(require_login)
 ):
     if user.person_type not in ("employee", "admin"):
-        return RedirectResponse(url="/dashboard", status_code=303)
+        raise HTTPException(status_code=403, detail="Unzureichende Berechtigungen")
 
     app_obj = db.query(Application).filter(Application.id == application_id).first()
     if not app_obj:
-        return RedirectResponse(url="/dashboard", status_code=303)
+        raise HTTPException(status_code=404, detail="Antrag nicht gefunden")
 
+    # Update status based on decision
+    status = ""
     if decision == "accept":
-        app_obj.status = "angenommen"
+        status = "angenommen"
+        app_obj.status = status
     elif decision == "reject":
-        app_obj.status = "abgelehnt"
+        status = "abgelehnt"
+        app_obj.status = status
+    else:
+        raise HTTPException(status_code=400, detail="Ungültige Entscheidung")
 
-    app_obj.decided_at = datetime.utcnow()
+    # Update application metadata
+    app_obj.decided_at = datetime.now()
     app_obj.handled_by_id = user.id
     db.commit()
     db.refresh(app_obj)
-    status ="angenommen" if decision == "accept" else "abgelehnt"
-    formatted_date = app_obj.created_at.strftime("%d.%m.%Y")
-    # Send email
-    person = app_obj.person
+    
+    # Send email notification to customer
+    person = db.query(Person).filter(Person.id == app_obj.person_id).first()
     if person:
-        subject = "Loan Status Update"
-       
-        body = (
-            f"Hallo {person.first_name},\n\n"
-            f"Ihr Darlehensantrag von {formatted_date} wurde {status}.\n\n"
+        formatted_date = app_obj.created_at.strftime("%d.%m.%Y")
+        email_service.send_loan_status_email(
+            to_address=person.email,
+            first_name=person.first_name,
+            application_date=formatted_date,
+            loan_type=app_obj.loan_type,
+            status=status,
+            reason=app_obj.reason
         )
-        send_email(to_address=person.email, subject=subject, body=body)
 
     return RedirectResponse(url="/dashboard", status_code=303)
 
@@ -126,16 +134,20 @@ def update_user_role(
 ):
     # Only admin can update users
     if admin.person_type != "admin":
-        # if not admin => maybe show an error or just redirect
-        return RedirectResponse(url="/dashboard", status_code=303)
+        raise HTTPException(status_code=403, detail="Unzureichende Berechtigungen")
+
+    # Validate person_type
+    if person_type not in ["admin", "employee", "customer"]:
+        raise HTTPException(status_code=400, detail="Ungültiger Benutzertyp")
 
     # Fetch user and update their role
     user_obj = db.query(Person).filter(Person.id == user_id).first()
-    if user_obj:
-        user_obj.person_type = person_type
-        db.commit()
-        db.refresh(user_obj)
+    if not user_obj:
+        raise HTTPException(status_code=404, detail="Benutzer nicht gefunden")
+        
+    user_obj.person_type = person_type
+    db.commit()
+    db.refresh(user_obj)
 
     # After updating, go back to dashboard
     return RedirectResponse(url="/dashboard", status_code=303)
-
