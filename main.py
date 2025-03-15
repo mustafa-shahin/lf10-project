@@ -117,7 +117,6 @@ app.include_router(home_router)
 
 @app.get("/", response_class=HTMLResponse)
 def root(request: Request, db: Session = Depends(get_db)):
-    """Root endpoint redirects based on user role"""
     # Check if user is logged in
     user = get_current_user(request, db)
     logger.debug(f"Root endpoint - User: {user.id if user else None}")
