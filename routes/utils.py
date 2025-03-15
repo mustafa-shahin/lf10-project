@@ -5,7 +5,6 @@ from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 from typing import Optional, Dict, Any
 from datetime import datetime, timedelta
-from services.email_service import email_service
 from db import SessionLocal
 from models import Person
 
@@ -158,7 +157,6 @@ def create_session_cookie(response, person_id: int):
     logger.debug(f"Current sessions after creation: {sessions}")
 
 def clear_session_cookie(response, request: Request):
-    """Clear session and remove cookie"""
     session_id = request.cookies.get("session_id")
     if session_id and session_id in sessions:
         del sessions[session_id]
@@ -166,32 +164,3 @@ def clear_session_cookie(response, request: Request):
     
     # Ensure cookie is properly deleted with the same path
     response.delete_cookie(key="session_id", path="/")
-
-    """
-    Legacy email sending function that uses the email service.
-    This remains for backward compatibility.
-    """
-    try:
-        # Create a simple HTML wrapper
-        html_content = f"""
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset="UTF-8">
-            <title>{subject}</title>
-        </head>
-        <body>
-            {body.replace('\n', '<br>')}
-        </body>
-        </html>
-        """
-        
-        # Use the email service
-        return email_service.send_custom_email(
-            to_address=to_address,
-            subject=subject,
-            html_content=html_content
-        )
-    except Exception as e:
-        logger.error(f"Failed to send email to {to_address}: {str(e)}")
-        return False

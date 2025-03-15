@@ -1,17 +1,16 @@
 # services/email_service.py
 import os
 import sys
-
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from jinja2 import Environment, FileSystemLoader, select_autoescape
-
-# Add the parent directory to sys.path to properly import config
+import logging
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from config import SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_TLS
 
 
+logger = logging.getLogger(__name__)
 class EmailService:
     def __init__(self):
         # Create templates directory if it doesn't exist
@@ -30,11 +29,11 @@ class EmailService:
         # Check if SMTP is configured
         self.is_configured = bool(SMTP_HOST and SMTP_USER and SMTP_PASS)
         if not self.is_configured:
-            print("SMTP not fully configured. Emails will not be sent.")
+            logger.error("SMTP not fully configured. Emails will not be sent.")
 
     def send_email(self, to_address, subject, template_name, context=None):
         if not self.is_configured:
-            print(f"Email to {to_address} not sent: SMTP not configured")
+            logger.error(f"Email to {to_address} not sent: SMTP not configured")
             return False
             
         if context is None:
@@ -62,13 +61,13 @@ class EmailService:
                     server.starttls()
                 server.login(SMTP_USER, SMTP_PASS)
                 server.sendmail(SMTP_USER, [to_address], msg.as_string())
-                print(f"Email sent to {to_address}: {subject}")
+                logger.info(f"Email sent to {to_address}: {subject}")
                 return True
             finally:
                 server.quit()
                 
         except Exception as e:
-            print(f"Failed to send email to {to_address}: {str(e)}")
+            logger.error(f"Failed to send email to {to_address}: {str(e)}")
             return False
             
     def send_welcome_email(self, to_address, first_name):
@@ -99,7 +98,7 @@ class EmailService:
         
     def send_custom_email(self, to_address, subject, html_content):
         if not self.is_configured:
-            print(f"Custom email to {to_address} not sent: SMTP not configured")
+            logger.error(f"Custom email to {to_address} not sent: SMTP not configured")
             return False
             
         try:
@@ -126,7 +125,7 @@ class EmailService:
                 server.quit()
                 
         except Exception as e:
-            print(f"Failed to send custom email to {to_address}: {str(e)}")
+            logger.error(f"Failed to send custom email to {to_address}: {str(e)}")
             return False
 
 email_service = EmailService()
