@@ -145,7 +145,6 @@ async def not_found_exception_handler(request: Request, exc):
 
 @app.exception_handler(500)
 async def server_error_exception_handler(request: Request, exc):
-    """Custom 500 error handler"""
     logger.error(f"Internal server error: {str(exc)}")
     return templates.TemplateResponse(
         "error.html", 
