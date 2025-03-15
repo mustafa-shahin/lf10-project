@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Status Ihres Kreditantrags</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        max-width: 600px;
+        margin: 0 auto;
+      }
+      .header {
+        background-color: #003366;
+        padding: 20px;
+        text-align: center;
+      }
+      .header h1 {
+        color: white;
+        margin: 0;
+      }
+      .content {
+        padding: 20px;
+        background-color: #f9f9f9;
+      }
+      .footer {
+        padding: 15px;
+        text-align: center;
+        font-size: 12px;
+        color: #666;
+        background-color: #eee;
+      }
+      .status-box {
+        padding: 15px;
+        margin: 20px 0;
+        border-radius: 4px;
+      }
+      .status-approved {
+        background-color: #dff0d8;
+        border: 1px solid #d6e9c6;
+        color: #3c763d;
+      }
+      .status-rejected {
+        background-color: #f2dede;
+        border: 1px solid #ebccd1;
+        color: #a94442;
+      }
+      .status-pending {
+        background-color: #fcf8e3;
+        border: 1px solid #faebcc;
+        color: #8a6d3b;
+      }
+      .application-details {
+        background-color: #f0f0f0;
+        padding: 15px;
+        border-radius: 4px;
+        margin: 20px 0;
+      }
+      .button {
+        display: inline-block;
+        background-color: #003366;
+        color: white;
+        padding: 10px 20px;
+        text-decoration: none;
+        border-radius: 4px;
+        margin-top: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <h1>Status Ihres Kreditantrags</h1>
+    </div>
+    <div class="content">
+      <p>Hallo {{ first_name }},</p>
+
+      <p>
+        wir möchten Sie über den Status Ihres Kreditantrags vom {{
+        application_date }} informieren.
+      </p>
+
+      <div class="application-details">
+        <p><strong>Produkt:</strong> {{ loan_type }}</p>
+      </div>
+
+      {% if status == "angenommen" %}
+      <div class="status-box status-approved">
+        <p><strong>Status:</strong> Ihr Kreditantrag wurde genehmigt!</p>
+      </div>
+      <p>
+        Wir freuen uns, Ihnen mitteilen zu können, dass Ihr Kreditantrag
+        genehmigt wurde. Ein Mitarbeiter wird sich in Kürze mit Ihnen in
+        Verbindung setzen, um die nächsten Schritte zu besprechen.
+      </p>
+      {% elif status == "abgelehnt" %}
+      <div class="status-box status-rejected">
+        <p><strong>Status:</strong> Leider wurde Ihr Kreditantrag abgelehnt.</p>
+        {% if reason and loan_type == "Baudarlehen" %}
+        <p><strong>Begründung:</strong> {{ reason }}</p>
+        {% endif %}
+      </div>
+      <p>
+        Es tut uns leid, Ihnen mitteilen zu müssen, dass Ihr Kreditantrag
+        derzeit nicht genehmigt werden konnte. Wenn Sie Fragen haben oder
+        weitere Informationen benötigen, können Sie sich gerne an unseren
+        Kundenservice wenden.
+      </p>
+      {% else %}
+      <div class="status-box status-pending">
+        <p>
+          <strong>Status:</strong> Ihr Kreditantrag wird derzeit bearbeitet.
+        </p>
+      </div>
+      <p>
+        Wir bearbeiten Ihren Kreditantrag derzeit. Sie erhalten in Kürze eine
+        weitere Benachrichtigung mit dem Ergebnis.
+      </p>
+      {% endif %}
+
+      <p>
+        Sie können den Status Ihres Antrags jederzeit in Ihrem Kundenportal
+        einsehen.
+      </p>
+
+      <p>
+        <a href="http://127.0.0.1:8000/dashboard" class="button"
+          >Zum Kundenportal</a
+        >
+      </p>
+
+      <p>Bei Fragen stehen wir Ihnen gerne zur Verfügung.</p>
+
+      <p>
+        Mit freundlichen Grüßen,<br />
+        Ihr All Invest Bank-Team
+      </p>
+    </div>
+    <div class="footer">
+      <p>
+        Diese E-Mail wurde automatisch generiert. Bitte antworten Sie nicht auf
+        diese Nachricht.
+      </p>
+      <p>&copy; 2025 All Invest Bank GmbH. Alle Rechte vorbehalten.</p>
+    </div>
+  </body>
+</html>

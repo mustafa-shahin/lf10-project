@@ -3,3 +3,4 @@ __pycache__
 test.db
 static/css/style.css
 App.ini
+app.log

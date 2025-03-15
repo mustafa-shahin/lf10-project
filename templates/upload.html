@@ -1,58 +1,122 @@
 {% extends "base.html" %} {% block title %}Dateien Hochladen{% endblock %} {%
 block content %}
+<div class="flex flex-col max-w-xl mx-auto">
+  <h1 class="text-center">Dateien Hochladen</h1>
 
-<h1>Dateien Hochladen</h1>
-<form
-  id="uploadForm"
-  method="post"
-  action="/upload_temp"
-  enctype="multipart/form-data"
->
-  <input type="hidden" name="application_id" value="{{ application_id }}" />
-  <input
-    type="hidden"
-    name="person_identifier"
-    value="{{ person_identifier }}"
-  />
-  <label for="files" class="custom-file-upload btn margin-0">
-    Datei auswählen (Bilder oder PDFs)
-  </label>
-  <input
-    type="file"
-    id="files"
-    accept="image/*, .pdf"
-    name="files"
-    multiple
-    required
-    class="hidden-file-input"
-  />
-  <ul id="selectedFiles" class="hiddenn"></ul>
+  <form
+    id="uploadForm"
+    method="post"
+    action="/upload_temp"
+    enctype="multipart/form-data"
+    class="mb-6"
+  >
+    <input type="hidden" name="application_id" value="{{ application_id }}" />
+    <input
+      type="hidden"
+      name="person_identifier"
+      value="{{ person_identifier }}"
+    />
 
-  <button class="btn" type="submit">Hochladen</button>
-</form>
-
-<h2>Dateien</h2>
-<ul id="fileList">
-  {% if temp_files %} {% for file_info in temp_files %}
-  <li id="file-{{ file_info.id }}">
-    <div class="flex flex-center flex-space-between">
-      <a
-        href="/download/{{ file_info.id }}"
-        class="flex flex-center no-link-style"
-      >
-        {{ file_info.file_name }}
-      </a>
-      <button class="delete-btn btn margin-0" data-file-id="{{ file_info.id }}">
-        Löschen
-      </button>
+    <div class="mb-4 text-center">
+      <label for="files" class="custom-file-upload btn margin-0">
+        Datei auswählen (Bilder oder PDFs)
+      </label>
+      <input
+        type="file"
+        id="files"
+        accept="image/*, .pdf"
+        name="files"
+        multiple
+        required
+        class="hidden-file-input"
+      />
     </div>
-  </li>
-  {% endfor %} {% else %}
-  <p id="noFiles">Keine Datei wurde Hochgeladen.</p>
-  {% endif %}
-</ul>
 
-<a class="btn" href="/dashboard">Fertig</a>
+    <ul id="selectedFiles" class="mb-4 hidden"></ul>
+  </form>
+
+  <h2 class="text-center mb-4">Dateien</h2>
+
+  <div class="border p-4 rounded mb-6">
+    <ul id="fileList" class="space-y-2">
+      {% if temp_files %} {% for file_info in temp_files %}
+      <li id="file-{{ file_info.id }}">
+        <div class="flex flex-center flex-space-between">
+          <a
+            href="/download/{{ file_info.id }}"
+            class="flex flex-center no-link-style"
+          >
+            {% if file_info.file_type.startswith('image/') %}
+            <img
+              src="/static/icons/photo.png"
+              alt="Bild"
+              style="width: 24px; height: 24px; margin-right: 8px"
+            />
+            {% else %}
+            <img
+              src="/static/icons/pdf.png"
+              alt="PDF"
+              style="width: 24px; height: 24px; margin-right: 8px"
+            />
+            {% endif %} {{ file_info.file_name }}
+          </a>
+          <button
+            class="delete-btn btn margin-0"
+            data-file-id="{{ file_info.id }}"
+          >
+            Löschen
+          </button>
+        </div>
+      </li>
+      {% endfor %} {% else %}
+      <p id="noFiles" class="text-center text-gray-500">
+        Keine Datei wurde hochgeladen.
+      </p>
+      {% endif %}
+    </ul>
+  </div>
+
+  <div class="text-center">
+    <a id="finalizeBtn" class="btn" href="/dashboard">Fertig</a>
+  </div>
+</div>
+
+<style>
+  /* Styles for the upload indicator */
+  .uploading-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    background-color: #f0f0f0;
+    border-radius: 4px;
+    margin: 10px 0;
+  }
+
+  .spinner {
+    width: 20px;
+    height: 20px;
+    margin-left: 10px;
+    border: 3px solid rgba(0, 0, 0, 0.1);
+    border-radius: 50%;
+    border-top-color: #003366;
+    animation: spin 1s ease-in-out infinite;
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  .error-message {
+    color: #cc0000;
+    padding: 8px;
+    background-color: #ffeeee;
+    border-radius: 4px;
+    text-align: center;
+  }
+</style>
 
 <script src="/static/scripts/Upload-Template.js"></script>
 {% endblock %}
