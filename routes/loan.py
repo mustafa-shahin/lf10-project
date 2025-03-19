@@ -143,6 +143,8 @@ def loan_submit(
             ccr=ccr_value,
             loan_type=loan_type
         )
+
+        assignedRole = "manager" if (bonitaet_rating < 670 or dscr_value < 1.4) else "employee"
         
         # Get decision result
         result = decision_obj.evaluate()
@@ -173,7 +175,8 @@ def loan_submit(
             decision=result["decision"],
             reason=result["reason"],
             created_at=now,
-            decided_at=now if status == "abgelehnt" else None  # Set decided_at for rejected applications
+            decided_at=now if status == "abgelehnt" else None,  # Set decided_at for rejected applications
+            assignedRole = assignedRole
         )
 
         db.add(new_app)

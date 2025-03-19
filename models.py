@@ -62,6 +62,7 @@ class Application(Base):
 
     decision = Column(String, nullable=True)
     reason = Column(String, nullable=True)
+    assignedRole = Column(String, nullable=True)
     person = relationship(
         "Person",
         back_populates="applications",
