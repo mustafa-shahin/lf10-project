@@ -139,6 +139,7 @@ form {
     margin-top: 10px;
     border-radius: $border-radius;
     color: $color;
+    width: 100%;
   }
   #submitBtn.enabled {
     margin-top: 10px;
@@ -226,6 +227,7 @@ form {
 
 .btn {
   @extend %btn;
+  min-width: 125px;
 }
 
 a.btn {
@@ -288,8 +290,8 @@ td:has(ul.margin-0) {
 
 .decision button {
   min-width: 100px;
-  max-width: 100px;
-  width: 100px;
+  max-width: 125px;
+  width: 125px;
 }
 
 // ====================================
@@ -660,6 +662,8 @@ main {
 /// background-color: #896d13;
 .home-container {
   gap: 100px;
+  width: 100%;
+  max-width: unset;
   .box_main {
     align-items: center;
     gap: 10px;
@@ -703,10 +707,7 @@ ul.status-pending {
 .res-menu {
   background-color: $background-color;
 }
-.home-container {
-  width: 100%;
-  max-width: unset;
-}
+
 header a:not(.active):hover {
   color: $hover-color;
 }

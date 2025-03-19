@@ -27,39 +27,153 @@
     
       <div id="termGroup" style="display: none" class="flex-direction-column">
         <label for="term_in_years">Laufzeit (Jahre):</label>
-        <input type="number" id="term_in_years" name="term_in_years" min="1" required />
+        <input type="number" id="term_in_years" name="term_in_years" min="1" />
       </div>
     
-      <!-- DSCR and CCR fields displayed only for Baudarlehen -->
-      <div id="available_income" style="display: none" class="flex flex-direction-column">
-        <label for="available_income">Verfügbares Einkommen (€):</label>
-        <input type="number" step="0.01" id="available_income" name="available_income" min="0" required />
+      <!-- Financial information fields - only displayed for Baudarlehen -->
+      <div id="financial_info" style="display: none" class="border rounded p-4 my-4">
+        <h3 class="text-lg font-bold mb-2">Finanzielle Informationen</h3>
+        
+        <div id="available_income" style="display: none" class="flex flex-direction-column">
+          <label for="available_income_input">Verfügbares Einkommen (€/Monat):</label>
+          <input type="number" step="0.01" id="available_income_input" name="available_income" min="0" />
+          <small>Ihr monatliches Nettoeinkommen nach Abzug aller notwendigen Ausgaben und Steuern.</small>
+        </div>
+        
+        <div id="total_debt_payments" style="display: none" class="flex flex-direction-column mt-3">
+          <label for="total_debt_payments_input">Schuldenzahlungen (€/Monat):</label>
+          <input type="number" step="0.01" id="total_debt_payments_input" name="total_debt_payments" min="0" />
+          <small>Alle monatlichen Zahlungen für bestehende Kredite, Darlehen und andere Schulden.</small>
+        </div>
+        
+        <div id="collateral_value" style="display: none" class="flex flex-direction-column mt-3">
+          <label for="collateral_value_input">Wert der Sicherheiten (€):</label>
+          <input type="number" step="0.01" id="collateral_value_input" name="collateral_value" min="0" />
+          <small>Der aktuelle Marktwert aller Vermögenswerte, die Sie als Sicherheit für dieses Darlehen anbieten.</small>
+        </div>
+        
+        <div id="total_outstanding_debt" style="display: none" class="flex flex-direction-column mt-3">
+          <label for="total_outstanding_debt_input">Ausstehende Gesamtschulden (€):</label>
+          <input type="number" step="0.01" id="total_outstanding_debt_input" name="total_outstanding_debt" min="0" />
+          <small>Die Gesamtsumme aller Ihrer bestehenden Kredite und Schulden (ohne das beantragte Darlehen).</small>
+        </div>
       </div>
-      <div id="total_debt_payments" style="display: none" class="flex flex-direction-column">
-        <label for="total_debt_payments">Schuldenzahlungen pro Jahr (€):</label>
-        <input type="number" step="0.01" id="total_debt_payments" name="total_debt_payments" min="0" required />
+      
+      <div class="mt-4">
+        <button class="btn" id="submitBtn" type="submit">Darlehen beantragen <i class="fa-solid fa-check"></i></button>
       </div>
-      <div id="collateral_value" style="display: none" class="flex flex-direction-column">
-        <label for="collateral_value">Wert der Sicherheiten (€):</label>
-        <input type="number" step="0.01" id="collateral_value" name="collateral_value" min="0" required />
-      </div>
-      <div id="total_outstanding_debt" style="display: none" class="flex flex-direction-column">
-        <label for="total_outstanding_debt">Ausstehende Gesamtschulden (€):</label>
-        <input type="number" step="0.01" id="total_outstanding_debt" name="total_outstanding_debt" min="0" required />
-      </div>
-      <button class="btn" id="submitBtn" type="submit">Darlehen beantragen <i class="fa-solid fa-check"></i></button>
     </form>
   </div>
 </div>
 
-
 <script src="{{ url_for('static_files', path='scripts/Form-Person.js') }}"></script>
-<script src="{{ url_for('static_files', path='scripts/loan_submit.js') }}"></script>
 <script>
-window.onload = function() {
-    if (document.getElementById("loan_type").value !== "") {
-        onLoanTypeChange();
+function populateSelect(selectElement, options) {
+  selectElement.innerHTML = "";
+  options.forEach((opt) => {
+    const option = document.createElement("option");
+    option.value = opt;
+    option.textContent = opt.charAt(0).toUpperCase() + opt.slice(1);
+    selectElement.appendChild(option);
+  });
+}
+
+function onLoanTypeChange() {
+  const loanType = document.getElementById("loan_type").value;
+  const subTypeSelect = document.getElementById("loan_subtype");
+  const repayAmountGroup = document.getElementById("repayAmountGroup");
+  const termGroup = document.getElementById("termGroup");
+  const financialInfo = document.getElementById("financial_info");
+
+  // Hide repay amount and term groups initially
+  repayAmountGroup.style.display = "none";
+  termGroup.style.display = "none";
+  financialInfo.style.display = "none";
+  subTypeSelect.innerHTML = "";
+
+  const SOFORT_SUBTYPES = ["tilgung", "endfaellig", "annuitaet"];
+  const BAU_SUBTYPES = ["annuitaet"];
+
+  if (loanType === "Sofortkredit") {
+    populateSelect(subTypeSelect, SOFORT_SUBTYPES);
+  } else if (loanType === "Baudarlehen") {
+    populateSelect(subTypeSelect, BAU_SUBTYPES);
+    // Show financial info fields for Baudarlehen
+    financialInfo.style.display = "block";
+  }
+
+  // Show/hide DSCR/CCR fields based on loan type and toggle their required/disabled status
+  const dscrFields = [
+    document.getElementById("available_income"),
+    document.getElementById("total_debt_payments"),
+    document.getElementById("collateral_value"),
+    document.getElementById("total_outstanding_debt")
+  ];
+  
+  dscrFields.forEach((field) => {
+    if (!field) return;
+    
+    const input = field.querySelector("input");
+    if (loanType === "Baudarlehen") {
+      field.style.display = "flex";
+      if (input) {
+        input.required = true;
+        input.disabled = false;
+      }
+    } else {
+      field.style.display = "none";
+      if (input) {
+        input.required = false;
+        input.disabled = true;
+      }
     }
+  });
+
+  onSubTypeChange();
+}
+
+function onSubTypeChange() {
+  const loanType = document.getElementById("loan_type").value;
+  const subType = document.getElementById("loan_subtype").value;
+  const repayAmountGroup = document.getElementById("repayAmountGroup");
+  const termGroup = document.getElementById("termGroup");
+  const repaymentInput = document.getElementById("repayment_amount");
+  const termInput = document.getElementById("term_in_years");
+
+  const shouldShowRepayAmount = loanType === "Sofortkredit" && subType === "tilgung";
+  const shouldShowTerm = loanType === "Baudarlehen" || 
+                         (loanType === "Sofortkredit" && (subType === "annuitaet" || subType === "endfaellig"));
+
+  repayAmountGroup.style.display = shouldShowRepayAmount ? "flex" : "none";
+  termGroup.style.display = shouldShowTerm ? "flex" : "none";
+
+  // Set required/disabled states
+  if (repaymentInput) {
+    repaymentInput.required = shouldShowRepayAmount;
+    repaymentInput.disabled = !shouldShowRepayAmount;
+    if (!shouldShowRepayAmount) repaymentInput.value = "";
+  }
+  
+  if (termInput) {
+    termInput.required = shouldShowTerm;
+    termInput.disabled = !shouldShowTerm;
+    if (!shouldShowTerm) termInput.value = "";
+  }
+  
+  // Set max values based on loan type
+  if (termInput) {
+    if (loanType === "Sofortkredit") {
+      termInput.max = 5; // Max 5 years for Sofortkredit
+    } else if (loanType === "Baudarlehen") {
+      termInput.max = 20; // Max 20 years for Baudarlehen
+    }
+  }
+}
+
+window.onload = function() {
+  if (document.getElementById("loan_type").value !== "") {
+    onLoanTypeChange();
+  }
 };
 </script>
 {% endblock %}
