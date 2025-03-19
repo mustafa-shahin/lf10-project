@@ -41,7 +41,7 @@ def update_role(
         return RedirectResponse(url="/dashboard", status_code=303)
 
     # Check that new_role is valid
-    if new_role not in ("admin", "employee", "customer"):
+    if new_role not in ("admin", "employee", "customer", "manager", "director"):
         return RedirectResponse(url="/admin/users", status_code=303)
 
     person = db.query(Person).filter(Person.id == person_id).first()
