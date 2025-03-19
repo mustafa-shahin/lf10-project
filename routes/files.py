@@ -28,7 +28,7 @@ def get_upload(
         raise HTTPException(status_code=404, detail="Application not found.")
         
     # Check if the user is authorized to view this application
-    if app_obj.person_id != user.id and user.person_type not in ["admin", "employee"]:
+    if app_obj.person_id != user.id and user.person_type not in ["admin", "employee", "manager", "director"]:
         logger.warning(f"User {user.id} tried to access application {application_id} belonging to user {app_obj.person_id}")
         raise HTTPException(status_code=403, detail="You don't have permission to access this application.")
 
@@ -62,7 +62,7 @@ async def upload_temp(
         raise HTTPException(status_code=404, detail="Application not found.")
         
     # Check if the user is authorized to upload to this application
-    if app_obj.person_id != user.id and user.person_type not in ["admin", "employee"]:
+    if app_obj.person_id != user.id and user.person_type not in ["admin", "employee", "manager", "director"]:
         logger.warning(f"User {user.id} tried to upload to application {application_id} belonging to user {app_obj.person_id}")
         raise HTTPException(status_code=403, detail="You don't have permission to upload to this application.")
 
@@ -121,7 +121,7 @@ def download_file(
     
     # - Admin/Employee can download any file
     # - Regular users can only download their own files
-    if user.person_type not in ["admin", "employee"]:
+    if user.person_type not in ["admin", "employee", "manager", "director"]:
         if file_record.person_id != user.id:
             logger.warning(f"User {user.id} tried to download file {file_id} belonging to user {file_record.person_id}")
             raise HTTPException(status_code=403, detail="You don't have permission to download this file.")

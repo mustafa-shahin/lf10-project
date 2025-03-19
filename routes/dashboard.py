@@ -23,7 +23,7 @@ def get_dashboard(
     if user.person_type == "admin":
         applications = []
         users = db.query(Person).all()
-    elif user.person_type == "employee":
+    elif user.person_type == "employee" or user.person_type == "manager" or user.person_type == "director":
         applications = db.query(Application).all()
         users = [] 
     else:
@@ -82,7 +82,9 @@ def get_dashboard(
     user_class_mapping = {
         "admin": "admin",
         "employee": "employee",
-        "customer": "customer"
+        "customer": "customer",
+        "manager" : "manager",
+        "director" : "director"
     }
 
     processed_users = []
@@ -180,7 +182,7 @@ def update_user_role(
         raise HTTPException(status_code=403, detail="Unzureichende Berechtigungen")
 
     # Validate person_type
-    if person_type not in ["admin", "employee", "customer"]:
+    if person_type not in ["admin", "employee", "customer", "manager", "director"]:
         logger.warning(f"Invalid person type: {person_type}")
         raise HTTPException(status_code=400, detail="Ungültiger Benutzertyp")
 
