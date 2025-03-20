@@ -158,7 +158,9 @@ def loan_submit(
             "rejected": "abgelehnt",
             "pending": "in bearbeitung"
         }
-        
+        if result["decision"] == "approved" and _assignedRole == "manager":
+            result["decision"] = "approved_manager"
+            
         status = status_mapping.get(result["decision"], _status)
         
         # Create application record
