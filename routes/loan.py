@@ -144,7 +144,8 @@ def loan_submit(
             loan_type=loan_type
         )
 
-        assignedRole = "manager" if (bonitaet_rating < 670 or dscr_value < 1.4) else "employee"
+        _assignedRole = "manager" if (bonitaet_rating < 670 or dscr_value < 1.4) else "employee"
+        _status = "approved" if _assignedRole == "employee" else "approved_manager"
         
         # Get decision result
         result = decision_obj.evaluate()
@@ -153,11 +154,12 @@ def loan_submit(
         # Map decision to status
         status_mapping = {
             "approved": "in bearbeitung",  # Start in processing, even if auto-approved
+            "approved_manager" : "zur Entscheidung beim AL",
             "rejected": "abgelehnt",
             "pending": "in bearbeitung"
         }
         
-        status = status_mapping.get(result["decision"], "in bearbeitung")
+        status = status_mapping.get(result["decision"], _status)
         
         # Create application record
         now = datetime.now()
@@ -176,7 +178,7 @@ def loan_submit(
             reason=result["reason"],
             created_at=now,
             decided_at=now if status == "abgelehnt" else None,  # Set decided_at for rejected applications
-            assignedRole = assignedRole
+            assignedRole = _assignedRole
         )
 
         db.add(new_app)

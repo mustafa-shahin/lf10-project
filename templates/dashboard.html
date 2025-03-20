@@ -98,7 +98,7 @@
   </p>
 </div>
 
-{% elif user.person_type == "employee" or user.person_type == "manager" or user.person_type == "director" %}
+{% elif user.person_type == "employee" %}
 <h1 class="title text-center">Mitarbeiter Dashboard</h1>
 <div id="applications_table">
   <section class="table__header">
@@ -122,8 +122,8 @@
             <th>Erstelldatum</th>
             <th>Entscheidungsdatum</th>
             <th>Dateien</th>
-            <th>Entscheidung</th>
-            <th>Empfählung</th>
+            <th>Vorschlag</th>
+            <th>Empfehlung</th>
             <th class="border-top-right-radius">Aktionen</th>
           </tr>
         </thead>
@@ -240,6 +240,110 @@
                   </select>
                   <button class="btn" type="submit">Update</button>
                 </form>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+
+{% elif user.person_type == "manager" or user.person_type == "director" %}
+<h1 class="title text-center">Manager / AL Dashboard</h1>
+<div id="applications_table">
+  <section class="table__header">
+    <h1>Kreditanträge</h1>
+    {{ search_bar("Suche...") }}
+  </section>
+  <section class="table__body">
+    <div class="table-body">
+      <table>
+        <thead>
+          <tr>
+            <th class="border-top-left-radius">ID</th>
+            <th>Antrag</th>
+            <th>Typ</th>
+            <th>Höhe</th>
+            <th>Term (Jahre)</th>
+            <th>Status</th>
+            <th>DSCR</th>
+            <th>CCR</th>
+            <th>Bonität</th>
+            <th>Erstelldatum</th>
+            <th>Entscheidungsdatum</th>
+            <th>Dateien</th>
+            <th>Vorschlag</th>
+            <th>Empfehlung</th>
+            <th class="border-top-right-radius">Aktionen</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for app in applications %}
+            <tr class="{{ app.status_class }}">
+              <td>{{ app.id }}</td>
+              <td>{{ app.loan_type }}</td>
+              <td>{{ app.loan_subtype }}</td>
+              <td>{{ app.requested_amount }} €</td>
+              <td>{{ app.term_in_years }}</td>
+              <td>
+                <p class="status">
+                  {% if app.status == "angenommen" %}
+                    Angenommen
+                  {% elif app.status == "in bearbeitung" %}
+                    In Bearbeitung
+                  {% else %}
+                    Abgelehnt
+                  {% endif %}
+                </p>
+              </td>
+              <td>{{ app.dscr if app.dscr is not none else "N/A" }}</td>
+              <td>{{ app.ccr if app.ccr is not none else "N/A" }}</td>
+              <td>{{ app.bonitaet if app.bonitaet is not none else "N/A" }}</td>
+              <td>{{ app.created_at }}</td>
+              <td>{{ app.decided_at if app.decided_at else "Noch nicht entschieden" }}</td>
+              <td>
+                {% if app.files %}
+                <ul class="status-{{ app.status_class }}">
+                  {% for f in app.files %}
+                    <li class="flex items-center">
+                      {% if f.file_type.startswith('image/') %}
+                        <img src="/static/icons/photo.png" alt="icons" />
+                      {% else %}
+                        <img src="/static/icons/pdf.png" alt="icons" />
+                      {% endif %}                 
+                      <a href="/download/{{ f.id }}">{{ f.file_name | truncate(20, True, '...') }}</a>
+                    </li>
+                  {% endfor %}
+                </ul>
+                {% else %}
+                <span>Keine Dateien</span>
+                {% endif %}
+                {%if app.files%}
+                <a href="/upload?application_id={{ app.id }}" class="btn">Dateien verwalten</a>
+                {%endif%}
+              </td>
+              <td>
+                <p>{{ app.decision }}</p>
+              </td>
+              <td>
+                <p>{{ app.reason }}</p>
+              </td>
+              <td>
+                {% if app.status == "in bearbeitung" %}
+                  <form method="POST" action="/dashboard/decision" class="flex-center decision">
+                    <input type="hidden" name="application_id" value="{{ app.id }}">
+                    <input type="hidden" name="decision" value="accept">
+                    <button class="btn btn-success" type="submit">Annehmen</button>
+                  </form>
+                  <form method="POST" action="/dashboard/decision" class="flex-center decision">
+                    <input type="hidden" name="application_id" value="{{ app.id }}">
+                    <input type="hidden" name="decision" value="reject">
+                    <button class="btn btn-danger" type="submit">Ablehnen</button>
+                  </form>
+                {% else %}
+                  <span>Entscheidung getroffen</span>
+                {% endif %}
               </td>
             </tr>
           {% endfor %}

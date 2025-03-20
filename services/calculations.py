@@ -48,7 +48,7 @@ class LoanDecision:
     @staticmethod
     def get_bonitaet_score() -> float:
         random.seed(42) 
-        return round(random.uniform(550, 650), 2)
+        return  669#round(random.uniform(550, 650), 2)
 
     def evaluate(self):       
         logger.info(f"Evaluating loan application: type={self.loan_type}, boni={self.boni_score}, dscr={self.dscr}, ccr={self.ccr}")
