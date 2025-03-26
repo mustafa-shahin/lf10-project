@@ -19,6 +19,7 @@ from routes.loan import router as loan_router
 from routes.files import router as files_router
 from routes.about_us import router as about_us_router
 from routes.home import router as home_router
+from routes.notifications import router as notifications_router
 from contextlib import asynccontextmanager
 
 # Configure logging
@@ -114,6 +115,7 @@ app.include_router(files_router)
 app.include_router(admin_router)
 app.include_router(about_us_router)
 app.include_router(home_router)
+app.include_router(notifications_router)  # Add the new notifications router
 
 @app.get("/", response_class=HTMLResponse)
 def root(request: Request, db: Session = Depends(get_db)):
@@ -123,8 +125,8 @@ def root(request: Request, db: Session = Depends(get_db)):
     
     if user:
         # If user is admin or employee, redirect to dashboard
-        if user.person_type in ["admin", "employee"]:
-            logger.debug(f"Redirecting admin/employee to dashboard")
+        if user.person_type in ["admin", "employee", "manager"]:
+            logger.debug(f"Redirecting admin/employee/manager to dashboard")
             return RedirectResponse(url="/dashboard", status_code=303)
         # If user is customer, redirect to home
         else:

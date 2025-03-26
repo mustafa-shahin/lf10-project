@@ -1,0 +1,224 @@
+{% extends "base.html" %} {% block title %}Kunden Dashboard{% endblock %} {%
+block content %} {% macro search_bar(placeholder) %}
+<div class="input-group">
+  <input type="search" placeholder="{{ placeholder }}" />
+  <i class="fa-solid fa-magnifying-glass"></i>
+</div>
+{% endmacro %}
+
+<h1 class="title text-center">Kunden Dashboard</h1>
+
+<!-- Notifications section -->
+{% if notifications %}
+<div class="notifications-container mt-4 mb-4">
+  <h2 class="text-xl mb-2">Benachrichtigungen ({{ unread_count }})</h2>
+  <div class="notifications-list">
+    {% for notification in notifications %}
+    <div
+      class="notification-item p-3 mb-2 {% if not notification.read %}unread-notification{% endif %}"
+    >
+      <div class="notification-header flex flex-space-between">
+        <strong
+          >{{ notification.created_at.strftime("%d.%m.%Y %H:%M") }}</strong
+        >
+        {% if not notification.read %}
+        <form method="POST" action="/dashboard/mark-notification-read">
+          <input
+            type="hidden"
+            name="notification_id"
+            value="{{ notification.id }}"
+          />
+          <button type="submit" class="mark-read-btn">
+            <i class="fa-solid fa-check"></i> Als gelesen markieren
+          </button>
+        </form>
+        {% endif %}
+      </div>
+      <div class="notification-content">{{ notification.message }}</div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+<!-- Applications section -->
+<div id="applications_table">
+  <section class="table__header">
+    <h1>Meine Anträge</h1>
+    {{ search_bar("Suche...") }}
+  </section>
+  <section class="table__body">
+    <div class="table-body">
+      <table>
+        <thead>
+          <tr>
+            <th class="border-top-left-radius">ID</th>
+            <th>Antrag</th>
+            <th>Typ</th>
+            <th>Höhe</th>
+            <th>Laufzeit (Jahre)</th>
+            <th>Monatliche Rate</th>
+            <th>Zins</th>
+            <th>Status</th>
+            <th>Erstelldatum</th>
+            <th>Entscheidungsdatum</th>
+            <th class="border-top-right-radius">Dateien</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for app in applications %}
+          <tr class="{{ app.status_class }}">
+            <td>{{ app.id }}</td>
+            <td>{{ app.loan_type }}</td>
+            <td>{{ app.loan_subtype }}</td>
+            <td>{{ app.requested_amount }} €</td>
+            <td>{{ app.term_in_years }}</td>
+            <td>
+              {{ app.monthly_payment|round(2) if app.monthly_payment else "N/A"
+              }} €
+            </td>
+            <td>
+              {{ app.interest_rate|round(2) if app.interest_rate else 5.0 }}%
+            </td>
+            <td>
+              <p class="status">
+                {% if app.status == "angenommen" %} Angenommen {% elif
+                app.status == "in bearbeitung" %} In Bearbeitung {% else %}
+                Abgelehnt {% endif %}
+              </p>
+            </td>
+            <td>{{ app.created_at }}</td>
+            <td>
+              {{ app.decided_at if app.decided_at else "Noch nicht entschieden"
+              }}
+            </td>
+            <td>
+              {% if app.files %}
+              <ul class="status-{{ app.status_class }}">
+                {% for f in app.files %}
+                <li class="flex items-center">
+                  {% if f.file_type.startswith('image/') %}
+                  <img src="/static/icons/photo.png" alt="icons" />
+                  {% else %}
+                  <img src="/static/icons/pdf.png" alt="icons" />
+                  {% endif %}
+                  <a href="/download/{{ f.id }}"
+                    >{{ f.file_name | truncate(20, True, '...') }}</a
+                  >
+                </li>
+                {% endfor %} {% if app.status == "in bearbeitung" %}
+                <form action="/upload" class="flex-center upload-form">
+                  <input
+                    type="hidden"
+                    name="application_id"
+                    value="{{ app.id }}"
+                  />
+                  <button class="btn" type="submit">Dateien hochladen</button>
+                </form>
+                {% endif %}
+              </ul>
+              {% else %}
+              <div class="flex flex-center flex-space-between">
+                <span>Keine Dateien</span>
+                {% if app.status == "in bearbeitung" %}
+                <form action="/upload" class="flex-center upload-form">
+                  <input
+                    type="hidden"
+                    name="application_id"
+                    value="{{ app.id }}"
+                  />
+                  <button class="btn" type="submit">Dateien hochladen</button>
+                </form>
+                {% endif %}
+              </div>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  {% if not applications %}
+  <div class="no-applications-message">
+    <p>Sie haben noch keine Kreditanträge gestellt.</p>
+  </div>
+  {% endif %}
+
+  <p class="text-center loan-button mt-4">
+    <a class="btn" href="/loan">Einen neuen Kreditantrag erstellen</a>
+  </p>
+</div>
+
+<!-- Loan offers section -->
+{% set has_offers = false %} {% for app in applications %} {% if
+app.offer_created and app.status == "angenommen" %} {% set has_offers = true %}
+{% endif %} {% endfor %} {% if has_offers %}
+<div id="loan_offers_section" class="mt-8">
+  <h2 class="text-2xl mb-4">Ihre Kreditangebote</h2>
+  <div class="loan-offers-container">
+    {% for app in applications %} {% if app.offer_created and app.status ==
+    "angenommen" %}
+    <div class="loan-offer-card p-4 mb-4 border rounded">
+      <h3 class="text-xl mb-2">{{ app.loan_type }} #{{ app.id }}</h3>
+      <div class="loan-details">
+        <div class="loan-detail-row">
+          <span class="loan-detail-label">Kreditsumme:</span>
+          <span class="loan-detail-value">{{ app.requested_amount }} €</span>
+        </div>
+        <div class="loan-detail-row">
+          <span class="loan-detail-label">Laufzeit:</span>
+          <span class="loan-detail-value">{{ app.term_in_years }} Jahre</span>
+        </div>
+        <div class="loan-detail-row">
+          <span class="loan-detail-label">Zinssatz:</span>
+          <span class="loan-detail-value"
+            >{{ app.interest_rate|round(2) }}%</span
+          >
+        </div>
+        <div class="loan-detail-row">
+          <span class="loan-detail-label">Monatliche Rate:</span>
+          <span class="loan-detail-value highlight"
+            >{{ app.monthly_payment|round(2) }} €</span
+          >
+        </div>
+        <div class="loan-detail-row">
+          <span class="loan-detail-label">Gesamtkosten:</span>
+          <span class="loan-detail-value"
+            >{{ (app.monthly_payment * app.term_in_years * 12)|round(2) }}
+            €</span
+          >
+        </div>
+        <div class="loan-detail-row">
+          <span class="loan-detail-label">Gesamtzinsen:</span>
+          <span class="loan-detail-value"
+            >{{ ((app.monthly_payment * app.term_in_years * 12) -
+            app.requested_amount)|round(2) }} €</span
+          >
+        </div>
+      </div>
+
+      <!-- Accept/Decline Offer buttons would go here in a real application -->
+      <div class="loan-offer-actions mt-4">
+        <button
+          class="btn btn-success mr-2"
+          onclick="alert('Diese Funktion wird später implementiert.')"
+        >
+          Angebot annehmen
+        </button>
+        <button
+          class="btn btn-danger"
+          onclick="alert('Diese Funktion wird später implementiert.')"
+        >
+          Angebot ablehnen
+        </button>
+      </div>
+    </div>
+    {% endif %} {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+<script src="{{ url_for('static_files', path='scripts/script.js') }}"></script>
+{% endblock %}

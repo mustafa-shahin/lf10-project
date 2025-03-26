@@ -1,0 +1,252 @@
+{% extends "base.html" %} {% block title %}Benachrichtigungen{% endblock %} {%
+block content %}
+<div class="container">
+  <h1 class="title text-center">Benachrichtigungen</h1>
+
+  <div class="notifications-header flex flex-space-between mb-4">
+    <div class="notifications-count">
+      {{ notifications|length }} Benachrichtigungen ({{ unread_count }}
+      ungelesen)
+    </div>
+    {% if unread_count > 0 %}
+    <form method="POST" action="/notifications/mark-all-read">
+      <button type="submit" class="btn">Alle als gelesen markieren</button>
+    </form>
+    {% endif %}
+  </div>
+
+  {% if notifications %}
+  <div class="notifications-list">
+    {% for notification in notifications %}
+    <div
+      class="notification-item p-4 mb-3 {% if not notification.read %}unread-notification{% endif %} {% if notification.notification_type == 'approval_request' %}approval-request{% endif %}"
+    >
+      <div class="notification-header flex flex-space-between mb-2">
+        <div class="notification-metadata">
+          <span class="notification-date"
+            >{{ notification.created_at.strftime("%d.%m.%Y %H:%M") }}</span
+          >
+          {% if notification.sender %}
+          <span class="notification-sender"
+            >von {{ notification.sender.first_name }} {{
+            notification.sender.second_name }}</span
+          >
+          {% endif %}
+        </div>
+        <div class="notification-actions">
+          {% if not notification.read %}
+          <form
+            method="POST"
+            action="/notifications/mark-read"
+            class="inline-form"
+          >
+            <input
+              type="hidden"
+              name="notification_id"
+              value="{{ notification.id }}"
+            />
+            <button type="submit" class="mark-read-btn">
+              <i class="fa-solid fa-check"></i> Als gelesen markieren
+            </button>
+          </form>
+          {% endif %}
+          <button
+            class="delete-notification-btn"
+            data-id="{{ notification.id }}"
+          >
+            <i class="fa-solid fa-trash"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="notification-content">
+        <p>{{ notification.message }}</p>
+
+        {% if notification.application_id %}
+        <div class="notification-application mt-2">
+          <a
+            href="/dashboard#app-{{ notification.application_id }}"
+            class="btn btn-sm"
+            >Zum Antrag</a
+          >
+        </div>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="no-notifications text-center p-5">
+    <p>Sie haben keine Benachrichtigungen.</p>
+  </div>
+  {% endif %}
+</div>
+
+<style>
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  .notification-item {
+    background-color: #0c293c;
+    border-radius: 8px;
+    position: relative;
+  }
+  .unread-notification {
+    border-left: 4px solid #ffd700;
+  }
+  .approval-request {
+    border-left: 4px solid #dc3545;
+  }
+  .notification-metadata {
+    color: #aaa;
+    font-size: 0.9em;
+  }
+  .notification-sender {
+    margin-left: 10px;
+  }
+  .notification-content {
+    padding: 10px 0;
+  }
+  .mark-read-btn,
+  .delete-notification-btn {
+    background: none;
+    border: none;
+    color: #ddd;
+    cursor: pointer;
+    margin-left: 10px;
+  }
+  .mark-read-btn:hover {
+    color: #ffd700;
+  }
+  .delete-notification-btn:hover {
+    color: #dc3545;
+  }
+  .inline-form {
+    display: inline;
+  }
+  .btn-sm {
+    padding: 4px 8px;
+    font-size: 0.85em;
+  }
+</style>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // Handle notification deletion
+    const deleteButtons = document.querySelectorAll(".delete-notification-btn");
+    deleteButtons.forEach((button) => {
+      button.addEventListener("click", async function () {
+        const notificationId = this.dataset.id;
+        if (
+          confirm(
+            "Sind Sie sicher, dass Sie diese Benachrichtigung löschen möchten?"
+          )
+        ) {
+          try {
+            const response = await fetch(`/notifications/${notificationId}`, {
+              method: "DELETE",
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+              // Remove the notification from the UI
+              const notificationItem = this.closest(".notification-item");
+              notificationItem.remove();
+
+              // Update the count
+              const countElement = document.querySelector(
+                ".notifications-count"
+              );
+              const currentCount = parseInt(
+                countElement.textContent.split(" ")[0]
+              );
+              countElement.textContent = `${
+                currentCount - 1
+              } Benachrichtigungen`;
+
+              // If no notifications left, show the no-notifications message
+              if (currentCount - 1 === 0) {
+                const notificationsList = document.querySelector(
+                  ".notifications-list"
+                );
+                notificationsList.innerHTML = `
+                <div class="no-notifications text-center p-5">
+                  <p>Sie haben keine Benachrichtigungen.</p>
+                </div>
+              `;
+              }
+            } else {
+              alert(
+                "Fehler beim Löschen der Benachrichtigung: " + data.message
+              );
+            }
+          } catch (error) {
+            console.error("Error deleting notification:", error);
+            alert("Fehler beim Löschen der Benachrichtigung");
+          }
+        }
+      });
+    });
+
+    // Handle marking as read
+    const markReadForms = document.querySelectorAll(
+      'form[action="/notifications/mark-read"]'
+    );
+    markReadForms.forEach((form) => {
+      form.addEventListener("submit", async function (e) {
+        e.preventDefault();
+
+        const formData = new FormData(this);
+        const notificationId = formData.get("notification_id");
+
+        try {
+          const response = await fetch("/notifications/mark-read", {
+            method: "POST",
+            body: formData,
+          });
+
+          const data = await response.json();
+
+          if (data.success) {
+            // Update the UI - remove unread class
+            const notificationItem = this.closest(".notification-item");
+            notificationItem.classList.remove("unread-notification");
+
+            // Remove the mark read button
+            this.remove();
+
+            // Update unread count
+            const countElement = document.querySelector(".notifications-count");
+            const matches =
+              countElement.textContent.match(/\((\d+) ungelesen\)/);
+            if (matches && matches[1]) {
+              const unreadCount = parseInt(matches[1]);
+              const newCount = unreadCount - 1;
+              countElement.textContent = countElement.textContent.replace(
+                `(${unreadCount} ungelesen)`,
+                `(${newCount} ungelesen)`
+              );
+
+              // If no more unread notifications, remove the mark all as read button
+              if (newCount === 0) {
+                const markAllForm = document.querySelector(
+                  'form[action="/notifications/mark-all-read"]'
+                );
+                if (markAllForm) markAllForm.remove();
+              }
+            }
+          } else {
+            alert("Fehler beim Markieren als gelesen: " + data.message);
+          }
+        } catch (error) {
+          console.error("Error marking notification as read:", error);
+          alert("Fehler beim Markieren als gelesen");
+        }
+      });
+    });
+  });
+</script>
+{% endblock %}

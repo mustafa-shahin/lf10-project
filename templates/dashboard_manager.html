@@ -1,0 +1,269 @@
+{% extends "base.html" %} {% block title %}Manager Dashboard{% endblock %} {%
+block content %} {% macro search_bar(placeholder) %}
+<div class="input-group">
+  <input type="search" placeholder="{{ placeholder }}" />
+  <i class="fa-solid fa-magnifying-glass"></i>
+</div>
+{% endmacro %}
+
+<h1 class="title text-center">Manager Dashboard</h1>
+
+<!-- Notifications section -->
+{% if notifications %}
+<div class="notifications-container mt-4 mb-4">
+  <h2 class="text-xl mb-2">Benachrichtigungen ({{ unread_count }})</h2>
+  <div class="notifications-list">
+    {% for notification in notifications %}
+    <div
+      class="notification-item p-3 mb-2 {% if not notification.read %}unread-notification{% endif %} {% if notification.notification_type == 'approval_request' %}approval-request{% endif %}"
+    >
+      <div class="notification-header flex flex-space-between">
+        <strong
+          >{{ notification.created_at.strftime("%d.%m.%Y %H:%M") }}</strong
+        >
+        {% if not notification.read %}
+        <form method="POST" action="/dashboard/mark-notification-read">
+          <input
+            type="hidden"
+            name="notification_id"
+            value="{{ notification.id }}"
+          />
+          <button type="submit" class="mark-read-btn">
+            <i class="fa-solid fa-check"></i> Als gelesen markieren
+          </button>
+        </form>
+        {% endif %}
+      </div>
+      <div class="notification-content">
+        {{ notification.message }} {% if notification.application_id %}
+        <div class="notification-actions mt-2">
+          <a href="#app-{{ notification.application_id }}" class="btn btn-sm"
+            >Zum Antrag</a
+          >
+        </div>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+<!-- Pending Approvals Section -->
+{% set pending_approvals = [] %} {% for app in applications %} {% if
+app.needs_manager_approval and app.manager_approved is none %} {% set
+pending_approvals = pending_approvals.append(app) %} {% endif %} {% endfor %} {%
+if pending_approvals %}
+<div id="pending_approvals" class="mt-4 mb-8">
+  <h2 class="text-2xl mb-4">Anträge die Ihre Genehmigung benötigen</h2>
+  <div class="approvals-container">
+    {% for app in applications %} {% if app.needs_manager_approval and
+    app.manager_approved is none %}
+    <div class="approval-card p-4 mb-4 border rounded" id="app-{{ app.id }}">
+      <div class="approval-header flex flex-space-between">
+        <h3 class="text-xl">{{ app.loan_type }} Antrag #{{ app.id }}</h3>
+        <span class="approval-status">Genehmigung ausstehend</span>
+      </div>
+
+      <div class="approval-details mt-4">
+        <div class="approval-detail-row">
+          <span class="approval-detail-label">Kunde:</span>
+          <span class="approval-detail-value">{{ app.customer_name }}</span>
+        </div>
+        <div class="approval-detail-row">
+          <span class="approval-detail-label">Kredittyp:</span>
+          <span class="approval-detail-value">{{ app.loan_type }}</span>
+        </div>
+        <div class="approval-detail-row">
+          <span class="approval-detail-label">Untertyp:</span>
+          <span class="approval-detail-value">{{ app.loan_subtype }}</span>
+        </div>
+        <div class="approval-detail-row">
+          <span class="approval-detail-label">Betrag:</span>
+          <span class="approval-detail-value"
+            >{{ app.requested_amount }} €</span
+          >
+        </div>
+        <div class="approval-detail-row">
+          <span class="approval-detail-label">Laufzeit:</span>
+          <span class="approval-detail-value"
+            >{{ app.term_in_years }} Jahre</span
+          >
+        </div>
+        <div class="approval-detail-row">
+          <span class="approval-detail-label">DSCR:</span>
+          <span class="approval-detail-value"
+            >{{ app.dscr if app.dscr is not none else "N/A" }}</span
+          >
+        </div>
+        <div class="approval-detail-row">
+          <span class="approval-detail-label">CCR:</span>
+          <span class="approval-detail-value"
+            >{{ app.ccr if app.ccr is not none else "N/A" }}</span
+          >
+        </div>
+        <div class="approval-detail-row">
+          <span class="approval-detail-label">Bonität:</span>
+          <span class="approval-detail-value"
+            >{{ app.bonitaet if app.bonitaet is not none else "N/A" }}</span
+          >
+        </div>
+        <div class="approval-detail-row">
+          <span class="approval-detail-label">Antragsdatum:</span>
+          <span class="approval-detail-value">{{ app.created_at }}</span>
+        </div>
+      </div>
+
+      <div class="approval-files mt-4">
+        <h4 class="text-lg mb-2">Angehängte Dateien</h4>
+        {% if app.files %}
+        <ul class="file-list">
+          {% for f in app.files %}
+          <li class="file-item flex items-center">
+            {% if f.file_type.startswith('image/') %}
+            <img src="/static/icons/photo.png" alt="icons" class="file-icon" />
+            {% else %}
+            <img src="/static/icons/pdf.png" alt="icons" class="file-icon" />
+            {% endif %}
+            <a href="/download/{{ f.id }}" class="file-link"
+              >{{ f.file_name }}</a
+            >
+          </li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <p>Keine Dateien angehängt</p>
+        {% endif %}
+      </div>
+
+      <div class="approval-actions mt-4">
+        <form
+          method="POST"
+          action="/dashboard/manager-decision"
+          class="manager-approval-form"
+        >
+          <input type="hidden" name="application_id" value="{{ app.id }}" />
+
+          <div class="notes-field mb-4">
+            <label for="notes-{{ app.id }}" class="block mb-2"
+              >Anmerkungen (optional)</label
+            >
+            <textarea
+              id="notes-{{ app.id }}"
+              name="notes"
+              rows="3"
+              class="notes-textarea w-full"
+            ></textarea>
+          </div>
+
+          <div class="approval-buttons flex gap-4">
+            <button
+              type="submit"
+              name="decision"
+              value="approve"
+              class="btn btn-success"
+            >
+              Genehmigen
+            </button>
+            <button
+              type="submit"
+              name="decision"
+              value="reject"
+              class="btn btn-danger"
+            >
+              Ablehnen
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+    {% endif %} {% endfor %}
+  </div>
+</div>
+{% else %}
+<div class="mt-4 mb-8 text-center">
+  <p>Derzeit sind keine Anträge zur Genehmigung vorhanden.</p>
+</div>
+{% endif %}
+
+<!-- All Applications Table -->
+<div id="applications_table">
+  <section class="table__header">
+    <h1>Alle Kreditanträge</h1>
+    {{ search_bar("Suche...") }}
+  </section>
+  <section class="table__body">
+    <div class="table-body">
+      <table>
+        <thead>
+          <tr>
+            <th class="border-top-left-radius">ID</th>
+            <th>Kunde</th>
+            <th>Antrag</th>
+            <th>Höhe</th>
+            <th>Laufzeit</th>
+            <th>Status</th>
+            <th>DSCR</th>
+            <th>CCR</th>
+            <th>Bonität</th>
+            <th>Bearbeiter</th>
+            <th>Erstelldatum</th>
+            <th>Manager Freigabe</th>
+            <th class="border-top-right-radius">Aktionen</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for app in applications %}
+          <tr class="{{ app.status_class }}">
+            <td>{{ app.id }}</td>
+            <td>{{ app.customer_name }}</td>
+            <td>{{ app.loan_type }}</td>
+            <td>{{ app.requested_amount }} €</td>
+            <td>{{ app.term_in_years }} Jahre</td>
+            <td>
+              <p class="status">
+                {% if app.status == "angenommen" %} Angenommen {% elif
+                app.status == "in bearbeitung" %} In Bearbeitung {% else %}
+                Abgelehnt {% endif %}
+              </p>
+            </td>
+            <td>{{ app.dscr if app.dscr is not none else "N/A" }}</td>
+            <td>{{ app.ccr if app.ccr is not none else "N/A" }}</td>
+            <td>{{ app.bonitaet if app.bonitaet is not none else "N/A" }}</td>
+            <td>
+              {{ app.handled_by.first_name if app.handled_by else "N/A" }}
+            </td>
+            <td>{{ app.created_at }}</td>
+            <td>
+              {% if app.needs_manager_approval %} {% if app.manager_approved ==
+              True %}
+              <span class="manager-approved">✓ Genehmigt</span>
+              {% elif app.manager_approved == False %}
+              <span class="manager-rejected">✕ Abgelehnt</span>
+              {% else %}
+              <span class="manager-pending">Ausstehend</span>
+              {% endif %} {% else %}
+              <span class="manager-not-needed">Nicht erforderlich</span>
+              {% endif %}
+            </td>
+            <td>
+              <a href="/upload?application_id={{ app.id }}" class="btn btn-sm"
+                >Dateien</a
+              >
+
+              {% if app.needs_manager_approval and app.manager_approved is none
+              %}
+              <a href="#app-{{ app.id }}" class="btn btn-sm btn-warning"
+                >Genehmigen</a
+              >
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+<script src="{{ url_for('static_files', path='scripts/script.js') }}"></script>
+{% endblock %}

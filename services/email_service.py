@@ -2,15 +2,16 @@
 import os
 import sys
 import smtplib
+import logging
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from jinja2 import Environment, FileSystemLoader, select_autoescape
-import logging
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from config import SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_TLS
 
 
 logger = logging.getLogger(__name__)
+
 class EmailService:
     def __init__(self):
         # Create templates directory if it doesn't exist
@@ -95,6 +96,41 @@ class EmailService:
             "reason": reason
         }
         return self.send_email(to_address, subject, "loan_status", context)
+    
+    def send_loan_processing_email(self, to_address, first_name, application_id, loan_type):
+        subject = "Kreditbank - Ihr Kreditantrag wird bearbeitet"
+        context = {
+            "first_name": first_name,
+            "application_id": application_id,
+            "loan_type": loan_type
+        }
+        return self.send_email(to_address, subject, "loan_processing", context)
+    
+    def send_manager_approval_needed_email(self, to_address, first_name, application_id, 
+                                          employee_name, loan_type, amount):
+        subject = "Kreditbank - Genehmigung für Kreditantrag erforderlich"
+        context = {
+            "first_name": first_name,
+            "application_id": application_id,
+            "employee_name": employee_name,
+            "loan_type": loan_type,
+            "amount": amount
+        }
+        return self.send_email(to_address, subject, "manager_approval_needed", context)
+    
+    def send_loan_offer_email(self, to_address, first_name, application_id, loan_type, 
+                             amount, interest_rate, monthly_payment, term):
+        subject = "Kreditbank - Ihr Kreditangebot"
+        context = {
+            "first_name": first_name,
+            "application_id": application_id,
+            "loan_type": loan_type,
+            "amount": amount,
+            "interest_rate": interest_rate,
+            "monthly_payment": monthly_payment,
+            "term": term
+        }
+        return self.send_email(to_address, subject, "loan_offer", context)
         
     def send_custom_email(self, to_address, subject, html_content):
         if not self.is_configured:

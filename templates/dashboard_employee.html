@@ -1,0 +1,251 @@
+{% extends "base.html" %}
+
+{% block title %}Mitarbeiter Dashboard{% endblock %}
+
+{% block content %}
+
+{% macro search_bar(placeholder) %}
+  <div class="input-group">
+    <input type="search" placeholder="{{ placeholder }}">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </div>
+{% endmacro %}
+
+<h1 class="title text-center">Mitarbeiter Dashboard</h1>
+
+<!-- Notifications section -->
+{% if notifications %}
+<div class="notifications-container mt-4 mb-4">
+  <h2 class="text-xl mb-2">Benachrichtigungen ({{ unread_count }})</h2>
+  <div class="notifications-list">
+    {% for notification in notifications %}
+      <div class="notification-item p-3 mb-2 {% if not notification.read %}unread-notification{% endif %}">
+        <div class="notification-header flex flex-space-between">
+          <strong>{{ notification.created_at.strftime("%d.%m.%Y %H:%M") }}</strong>
+          {% if not notification.read %}
+            <form method="POST" action="/dashboard/mark-notification-read">
+              <input type="hidden" name="notification_id" value="{{ notification.id }}">
+              <button type="submit" class="mark-read-btn"><i class="fa-solid fa-check"></i> Als gelesen markieren</button>
+            </form>
+          {% endif %}
+        </div>
+        <div class="notification-content">
+          {{ notification.message }}
+          {% if notification.application_id %}
+            <div class="notification-actions mt-2">
+              <a href="#app-{{ notification.application_id }}" class="btn btn-sm">Zum Antrag</a>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+<!-- Only show applications table if user is employee (not admin) -->
+{% if user.person_type != "admin" %}
+<div id="applications_table">
+  <section class="table__header">
+    <h1>Kreditanträge</h1>
+    {{ search_bar("Suche...") }}
+  </section>
+  <section class="table__body">
+    <div class="table-body">
+      <table>
+        <thead>
+          <tr>
+            <th class="border-top-left-radius">ID</th>
+            <th>Kunde</th>
+            <th>Antrag</th>
+            <th>Typ</th>
+            <th>Höhe</th>
+            <th>Term (Jahre)</th>
+            <th>Status</th>
+            <th>DSCR</th>
+            <th>CCR</th>
+            <th>Bonität</th>
+            <th>Erstelldatum</th>
+            <th>Dateien</th>
+            <th class="border-top-right-radius">Aktionen</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for app in applications %}
+            <tr class="{{ app.status_class }}" id="app-{{ app.id }}">
+              <td>{{ app.id }}</td>
+              <td>{{ app.customer_name }}</td>
+              <td>{{ app.loan_type }}</td>
+              <td>{{ app.loan_subtype }}</td>
+              <td>{{ app.requested_amount }} €</td>
+              <td>{{ app.term_in_years }}</td>
+              <td>
+                <p class="status">
+                  {% if app.status == "angenommen" %}
+                    Angenommen
+                  {% elif app.status == "in bearbeitung" %}
+                    In Bearbeitung
+                  {% else %}
+                    Abgelehnt
+                  {% endif %}
+                </p>
+              </td>
+              <td>{{ app.dscr if app.dscr is not none else "N/A" }}</td>
+              <td>{{ app.ccr if app.ccr is not none else "N/A" }}</td>
+              <td>{{ app.bonitaet if app.bonitaet is not none else "N/A" }}</td>
+              <td>{{ app.created_at }}</td>
+              <td>
+                {% if app.files %}
+                <ul class="status-{{ app.status_class }}">
+                  {% for f in app.files %}
+                    <li class="flex items-center">
+                      {% if f.file_type.startswith('image/') %}
+                        <img src="/static/icons/photo.png" alt="icons" />
+                      {% else %}
+                        <img src="/static/icons/pdf.png" alt="icons" />
+                      {% endif %}                 
+                      <a href="/download/{{ f.id }}">{{ f.file_name | truncate(20, True, '...') }}</a>
+                    </li>
+                  {% endfor %}
+                </ul>
+                {% else %}
+                <span>Keine Dateien</span>
+                {% endif %}
+                {%if app.files%}
+                <a href="/upload?application_id={{ app.id }}" class="btn">Dateien verwalten</a>
+                {%endif%}
+              </td>
+              <td>
+                {% if app.status != "in bearbeitung" %}
+                  <!-- Start processing button -->
+                  <form method="POST" action="/dashboard/process-loan" class="flex-center decision mb-2">
+                    <input type="hidden" name="application_id" value="{{ app.id }}">
+                    <button class="btn btn-secondary" type="submit">Bearbeiten</button>
+                  </form>
+                  {% elif ((1 <= app.dscr and app.dscr < 2 and app.ccr < 1) or (app.dscr >= 2 and app.ccr < 0.75)) and not app.needs_manager_approval %}
+
+                  <!-- Manager notification button for applications requiring additional security -->
+                  <form method="POST" action="/dashboard/request-manager-approval" class="flex-center decision mb-2">
+                    <input type="hidden" name="application_id" value="{{ app.id }}">
+                    <button class="btn btn-warning" type="submit">Manager benachrichtigen</button>
+                  </form>
+                  <div class="text-sm mt-2">
+                    <i class="fa-solid fa-info-circle"></i> Zusätzliche Sicherheit erforderlich - Manager-Entscheidung benötigt
+                  </div>
+                {% elif app.needs_manager_approval and app.manager_approved == True %}
+                  <!-- Manager has approved, show decision buttons -->
+                  <div class="text-sm text-success mb-2">
+                    <i class="fa-solid fa-check-circle"></i> Von Manager genehmigt
+                  </div>
+                  <form method="POST" action="/dashboard/decision" class="flex-center decision mb-2">
+                    <input type="hidden" name="application_id" value="{{ app.id }}">
+                    <input type="hidden" name="decision" value="accept">
+                    <button class="btn btn-success" type="submit">Annehmen</button>
+                  </form>
+                  <form method="POST" action="/dashboard/decision" class="flex-center decision">
+                    <input type="hidden" name="application_id" value="{{ app.id }}">
+                    <input type="hidden" name="decision" value="reject">
+                    <button class="btn btn-danger" type="submit">Ablehnen</button>
+                  </form>
+                {% elif app.needs_manager_approval and app.manager_approved == False %}
+                  <div class="text-sm text-danger">
+                    <i class="fa-solid fa-times-circle"></i> Von Manager abgelehnt
+                  </div>
+                {% elif app.needs_manager_approval %}
+                  <div class="text-sm">
+                    <i class="fa-solid fa-clock"></i> Warten auf Manager-Genehmigung
+                  </div>
+                {% elif app.status == "in bearbeitung" %}
+                  <!-- Normal decision buttons for applications not needing manager approval -->
+                  <form method="POST" action="/dashboard/decision" class="flex-center decision mb-2">
+                    <input type="hidden" name="application_id" value="{{ app.id }}">
+                    <input type="hidden" name="decision" value="accept">
+                    <button class="btn btn-success" type="submit">Annehmen</button>
+                  </form>
+                  <form method="POST" action="/dashboard/decision" class="flex-center decision">
+                    <input type="hidden" name="application_id" value="{{ app.id }}">
+                    <input type="hidden" name="decision" value="reject">
+                    <button class="btn btn-danger" type="submit">Ablehnen</button>
+                  </form>
+                {% elif app.offer_created %}
+                  <div class="text-sm text-success">
+                    <i class="fa-solid fa-check-circle"></i> Angebot erstellt
+                    {% if app.offer_sent %}
+                      <br><i class="fa-solid fa-envelope"></i> Angebot versandt
+                    {% endif %}
+                  </div>
+                {% else %}
+                  <span>Entscheidung getroffen</span>
+                {% endif %}
+                
+                {% if app.needs_manager_approval and app.manager_approved == True and not app.offer_created %}
+                  <!-- Manager has approved, create offer -->
+                  <div class="create-offer-form mt-3">
+                    <form method="POST" action="/dashboard/create-loan-offer" class="flex flex-col">
+                      <input type="hidden" name="application_id" value="{{ app.id }}">
+                      <div class="interest-rate-input mb-2">
+                        <label for="interest_rate_{{ app.id }}">Zinssatz (%)</label>
+                        <input type="number" step="0.01" id="interest_rate_{{ app.id }}" 
+                               name="interest_rate" value="5.0" min="1" max="15" required>
+                      </div>
+                      <button class="btn btn-success" type="submit">Angebot erstellen</button>
+                    </form>
+                  </div>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+{% endif %}
+
+<!-- Admin User Management Section -->
+{% if user.person_type == "admin" %}
+<div id="users_table" class="mt-8">     
+  <section class="table__header">
+    <h1>Benutzerverwaltung</h1>
+    {{ search_bar("Suche nach Benutzern...") }}
+  </section>
+  <section class="table__body">
+    <div class="table-body">
+      <table>
+        <thead>
+          <tr>
+            <th class="border-top-left-radius">ID</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th class="border-top-right-radius">Typ</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for u in users %}
+            <tr class="{{ u.person_class }}">
+              <td>{{ u.id }}</td>
+              <td>{{ u.name }}</td>
+              <td>{{ u.email }}</td>
+              <td>
+                <form method="POST" action="/dashboard/update-user" class="user-management flex-center flex-direction-row">
+                  <input type="hidden" name="user_id" value="{{ u.id }}">
+                  <select name="person_type" class="{{ u.person_class }}">
+                    <option value="customer" {% if u.person_type == "customer" %}selected{% endif %}>Kunde</option>
+                    <option value="employee" {% if u.person_type == "employee" %}selected{% endif %}>Mitarbeiter</option>
+                    <option value="manager" {% if u.person_type == "manager" %}selected{% endif %}>Abteilungsleiter</option>
+                    <option value="director" {% if u.person_type == "director" %}selected{% endif %}>Vorstand</option>
+                    <option value="admin" {% if u.person_type == "admin" %}selected{% endif %}>Admin</option>
+                  </select>
+                  <button class="btn" type="submit">Update</button>
+                </form>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+{% endif %}
+<script src="{{ url_for('static_files', path='scripts/script.js') }}"></script>
+{% endblock %}
