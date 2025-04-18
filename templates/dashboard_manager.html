@@ -9,19 +9,23 @@ block content %} {% macro search_bar(placeholder) %}
 <h1 class="title text-center">Manager Dashboard</h1>
 
 <!-- Notifications section -->
-{% if notifications %}
+{% if notifications %} {% set unread_notifications_count = 0 %} {% for
+notification in notifications %} {% if not notification.read %} {% set
+unread_notifications_count = unread_notifications_count + 1 %} {% endif %} {%
+endfor %} {% if unread_notifications_count > 0 %}
 <div class="notifications-container mt-4 mb-4">
-  <h2 class="text-xl mb-2">Benachrichtigungen ({{ unread_count }})</h2>
+  <h2 class="text-xl mb-2">
+    Benachrichtigungen ({{ unread_notifications_count }})
+  </h2>
   <div class="notifications-list">
-    {% for notification in notifications %}
+    {% for notification in notifications %} {% if not notification.read %}
     <div
-      class="notification-item p-3 mb-2 {% if not notification.read %}unread-notification{% endif %} {% if notification.notification_type == 'approval_request' %}approval-request{% endif %}"
+      class="notification-item p-3 mb-2 unread-notification {% if notification.notification_type == 'approval_request' %}approval-request{% endif %}"
     >
       <div class="notification-header flex flex-space-between">
         <strong
           >{{ notification.created_at.strftime("%d.%m.%Y %H:%M") }}</strong
         >
-        {% if not notification.read %}
         <form method="POST" action="/dashboard/mark-notification-read">
           <input
             type="hidden"
@@ -32,7 +36,6 @@ block content %} {% macro search_bar(placeholder) %}
             <i class="fa-solid fa-check"></i> Als gelesen markieren
           </button>
         </form>
-        {% endif %}
       </div>
       <div class="notification-content">
         {{ notification.message }} {% if notification.application_id %}
@@ -44,16 +47,13 @@ block content %} {% macro search_bar(placeholder) %}
         {% endif %}
       </div>
     </div>
-    {% endfor %}
+    {% endif %} {% endfor %}
   </div>
 </div>
-{% endif %}
-
-<!-- Pending Approvals Section -->
-{% set pending_approvals = [] %} {% for app in applications %} {% if
-app.needs_manager_approval and app.manager_approved is none %} {% set
-pending_approvals = pending_approvals.append(app) %} {% endif %} {% endfor %} {%
-if pending_approvals %}
+{% endif %} {% endif %} {% set pending_approvals = [] %} {% for app in
+applications %} {% if app.needs_manager_approval and app.manager_approved is
+none %} {% set pending_approvals = pending_approvals.append(app) %} {% endif %}
+{% endfor %} {% if pending_approvals %}
 <div id="pending_approvals" class="mt-4 mb-8">
   <h2 class="text-2xl mb-4">Anträge die Ihre Genehmigung benötigen</h2>
   <div class="approvals-container">
@@ -230,9 +230,7 @@ if pending_approvals %}
             <td>{{ app.dscr if app.dscr is not none else "N/A" }}</td>
             <td>{{ app.ccr if app.ccr is not none else "N/A" }}</td>
             <td>{{ app.bonitaet if app.bonitaet is not none else "N/A" }}</td>
-            <td>
-              {{ app.handled_by.first_name if app.handled_by else "N/A" }}
-            </td>
+            <td>{{ app.handler_name }}</td>
             <td>{{ app.created_at }}</td>
             <td>
               {% if app.needs_manager_approval %} {% if app.manager_approved ==

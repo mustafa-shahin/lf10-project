@@ -1,12 +1,10 @@
-# routes/dashboard.py
+
 from fastapi import APIRouter, Request, Depends, Form, HTTPException, Query
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from datetime import datetime
 import logging
-from typing import List, Optional
-
 from routes.utils import get_db, require_login, get_current_user
 from models import Application, Person, Notification
 from services.email_service import email_service
@@ -31,6 +29,7 @@ def get_dashboard_template(user_type: str) -> str:
     else:
         return "dashboard.html"  # Fallback to generic dashboard
 
+
 @router.get("/dashboard", response_class=HTMLResponse)
 def get_dashboard(
     request: Request,
@@ -40,28 +39,23 @@ def get_dashboard(
     # Choose dashboard template based on user type
     dashboard_template = get_dashboard_template(user.person_type)
     
+    applications = []
+    processed_apps = []
+    users = []
+    managers = []
+    
     # Get applications based on user type
     if user.person_type == "customer":
         applications = db.query(Application).filter(Application.person_id == user.id).all()
-        users = []
-        managers = []
     elif user.person_type == "manager":
         # Managers see all applications and those needing their approval
         applications = db.query(Application).all()
-        # Get applications needing manager approval
-        approval_needed = db.query(Application).filter(
-            Application.needs_manager_approval == True,
-            Application.manager_approved.is_(None)
-        ).all()
-        users = []
-        managers = []
     elif user.person_type == "admin":
-        applications = []
+        # Admin only needs users list, no applications
         users = db.query(Person).all()
         managers = db.query(Person).filter(Person.person_type == "manager").all()
     else:  # employee, director
         applications = db.query(Application).all()
-        users = []
         managers = db.query(Person).filter(Person.person_type == "manager").all()
 
     # Map status to CSS classes for visual styling
@@ -74,6 +68,7 @@ def get_dashboard(
     # Get notifications for the user
     notifications = notification_service.get_notifications_for_user(db, user.id)
     unread_notifications = [n for n in notifications if not n.read]
+    unread_count = len(unread_notifications)
 
     # Safe conversion helper function
     def safe_float_round(value, digits=2):
@@ -84,48 +79,60 @@ def get_dashboard(
         except (ValueError, TypeError):
             return value
 
-    # Process applications for display
-    processed_apps = []
-    for app in applications:
-        app_css_class = status_class_mapping.get(app.status, "unknown")
-        
-        # Format decision for display
-        decision_display = ""
-        if app.decision == "approved":
-            decision_display = "Angenommen"
-        elif app.decision == "rejected":
-            decision_display = "Abgelehnt"
-        elif app.decision == "pending":
-            decision_display = "Ausstehend"
-        
-        # Get customer name for application
-        customer = db.query(Person).filter(Person.id == app.person_id).first()
-        customer_name = f"{customer.first_name} {customer.second_name}" if customer else "Unbekannt"
-        
-        processed_apps.append({
-            "id": app.id,
-            "loan_type": app.loan_type,
-            "loan_subtype": app.loan_subtype,
-            "requested_amount": app.requested_amount,
-            "term_in_years": app.term_in_years,
-            "status": app.status,
-            "status_class": app_css_class, 
-            "created_at": app.created_at.strftime("%Y-%m-%d") if app.created_at else "",
-            "decided_at": app.decided_at.strftime("%Y-%m-%d") if app.decided_at else "",
-            "decision": decision_display,
-            "reason": app.reason,
-            "dscr": safe_float_round(app.dscr),
-            "ccr": safe_float_round(app.ccr),
-            "bonitaet": safe_float_round(app.bonitaet),
-            "files": app.files,
-            "needs_manager_approval": app.needs_manager_approval,
-            "manager_approved": app.manager_approved,
-            "customer_name": customer_name,
-            "interest_rate": app.interest_rate,
-            "monthly_payment": app.monthly_payment,
-            "offer_created": app.offer_created,
-            "offer_sent": app.offer_sent
-        })
+    # Process applications for display - only if we have applications
+    if applications:
+        for app in applications:
+            app_css_class = status_class_mapping.get(app.status, "unknown")
+            
+            # Format decision for display
+            decision_display = ""
+            if app.decision == "approved":
+                decision_display = "Angenommen"
+            elif app.decision == "rejected":
+                decision_display = "Abgelehnt"
+            elif app.decision == "pending":
+                decision_display = "Ausstehend"
+            
+            # Get customer name for application
+            customer = db.query(Person).filter(Person.id == app.person_id).first()
+            customer_name = f"{customer.first_name} {customer.second_name}" if customer else "Unbekannt"
+            
+            # Get handler name - either the manager who rejected or the employee who handled it
+            handler_name = "N/A"
+            if app.status == "abgelehnt" and app.manager_approved == False and app.manager_id:
+                manager = db.query(Person).filter(Person.id == app.manager_id).first()
+                if manager:
+                    handler_name = f"{manager.first_name} {manager.second_name} (Manager)"
+            elif app.handled_by_id:
+                handler = db.query(Person).filter(Person.id == app.handled_by_id).first()
+                if handler:
+                    handler_name = f"{handler.first_name} {handler.second_name}"
+                    
+            processed_apps.append({
+                "id": app.id,
+                "loan_type": app.loan_type,
+                "loan_subtype": app.loan_subtype,
+                "requested_amount": app.requested_amount,
+                "term_in_years": app.term_in_years,
+                "status": app.status,
+                "status_class": app_css_class, 
+                "created_at": app.created_at.strftime("%Y-%m-%d") if app.created_at else "",
+                "decided_at": app.decided_at.strftime("%Y-%m-%d") if app.decided_at else "",
+                "decision": decision_display,
+                "reason": app.reason,
+                "dscr": safe_float_round(app.dscr),
+                "ccr": safe_float_round(app.ccr),
+                "bonitaet": safe_float_round(app.bonitaet),
+                "files": app.files,
+                "needs_manager_approval": app.needs_manager_approval,
+                "manager_approved": app.manager_approved,
+                "customer_name": customer_name,
+                "interest_rate": app.interest_rate,
+                "monthly_payment": app.monthly_payment,
+                "offer_created": app.offer_created,
+                "offer_sent": app.offer_sent,
+                "handler_name": handler_name 
+            })
     
     # Process users for admin view
     user_class_mapping = {
@@ -146,7 +153,6 @@ def get_dashboard(
             "person_class": user_class_mapping.get(u.person_type, "unknown")
         })
 
-    # Process managers for employee view
     processed_managers = []
     for m in managers:
         processed_managers.append({
@@ -163,8 +169,8 @@ def get_dashboard(
             "applications": processed_apps,
             "users": processed_users,
             "managers": processed_managers,
-            "notifications": notifications,
-            "unread_count": len(unread_notifications)
+            "notifications": unread_notifications,
+            "unread_count": unread_count
         }
     )
 
@@ -354,7 +360,6 @@ def manager_approval_decision(
     db: Session = Depends(get_db),
     user: Person = Depends(require_login)
 ):
-    """Manager approval decision for loan applications"""
     # Only managers can make manager approval decisions
     if user.person_type != "manager":
         logger.warning(f"Unauthorized user ({user.person_type}) attempted to make manager decision")
@@ -377,8 +382,6 @@ def manager_approval_decision(
     app_obj.manager_id = user.id
     app_obj.manager_notes = notes
     
-    # If manager approved, keep status as processing
-    # If manager rejected, update status to rejected
     if not approved:
         app_obj.status = "abgelehnt"
         app_obj.decision = "rejected"
@@ -422,7 +425,6 @@ def mark_notification_read(
     db: Session = Depends(get_db),
     user: Person = Depends(require_login)
 ):
-    """Mark a notification as read"""
     success = notification_service.mark_notification_as_read(db, notification_id, user.id)
     if not success:
         logger.warning(f"Failed to mark notification {notification_id} as read for user {user.id}")
@@ -438,7 +440,6 @@ def create_loan_offer(
     db: Session = Depends(get_db),
     user: Person = Depends(require_login)
 ):
-    """Create a loan offer with calculated payments"""
     # Only employees can create loan offers
     if user.person_type not in ["employee", "manager"]:
         logger.warning(f"Unauthorized user ({user.person_type}) attempted to create a loan offer")
@@ -528,4 +529,50 @@ def update_user_role(
     logger.info(f"User {user_id} role updated to {person_type} by admin {admin.id}")
 
     # After updating, go back to dashboard
+    return RedirectResponse(url="/dashboard", status_code=303)
+
+# Add this code to your routes/dashboard.py file
+
+@router.post("/dashboard/request-manager-approval")
+def request_manager_approval(
+    request: Request,
+    application_id: int = Form(...),
+    db: Session = Depends(get_db),
+    user: Person = Depends(require_login)
+):
+    # Only employees can request manager approval
+    if user.person_type not in ["employee"]:
+        logger.warning(f"Unauthorized user ({user.person_type}) attempted to request manager approval")
+        raise HTTPException(status_code=403, detail="Unzureichende Berechtigungen")
+
+    # Find the application
+    app_obj = db.query(Application).filter(Application.id == application_id).first()
+    if not app_obj:
+        logger.warning(f"Application {application_id} not found")
+        raise HTTPException(status_code=404, detail="Antrag nicht gefunden")
+
+    # Mark application as needing manager approval
+    app_obj.needs_manager_approval = True
+    app_obj.handled_by_id = user.id
+    
+    # Send notification to managers
+    notification_service.notify_managers_for_approval(db, app_obj.id, user.id)
+    
+    # Get managers and send emails
+    managers = db.query(Person).filter(Person.person_type == "manager").all()
+    employee_name = f"{user.first_name} {user.second_name}"
+    
+    for manager in managers:
+        email_service.send_manager_approval_needed_email(
+            to_address=manager.email,
+            first_name=manager.first_name,
+            application_id=app_obj.id,
+            employee_name=employee_name,
+            loan_type=app_obj.loan_type,
+            amount=app_obj.requested_amount
+        )
+    
+    db.commit()
+    logger.info(f"Application {app_obj.id} marked for manager approval by {user.id}")
+    
     return RedirectResponse(url="/dashboard", status_code=303)

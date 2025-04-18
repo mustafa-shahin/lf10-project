@@ -13,37 +13,44 @@
 
 <h1 class="title text-center">Mitarbeiter Dashboard</h1>
 
-<!-- Notifications section -->
 {% if notifications %}
+{% set unread_notifications_count = 0 %}
+{% for notification in notifications %}
+  {% if not notification.read %}
+    {% set unread_notifications_count = unread_notifications_count + 1 %}
+  {% endif %}
+{% endfor %}
+
+{% if unread_notifications_count > 0 %}
 <div class="notifications-container mt-4 mb-4">
-  <h2 class="text-xl mb-2">Benachrichtigungen ({{ unread_count }})</h2>
+  <h2 class="text-xl mb-2">Benachrichtigungen ({{ unread_notifications_count }})</h2>
   <div class="notifications-list">
     {% for notification in notifications %}
-      <div class="notification-item p-3 mb-2 {% if not notification.read %}unread-notification{% endif %}">
-        <div class="notification-header flex flex-space-between">
-          <strong>{{ notification.created_at.strftime("%d.%m.%Y %H:%M") }}</strong>
-          {% if not notification.read %}
+      {% if not notification.read %}
+        <div class="notification-item p-3 mb-2 unread-notification">
+          <div class="notification-header flex flex-space-between">
+            <strong>{{ notification.created_at.strftime("%d.%m.%Y %H:%M") }}</strong>
             <form method="POST" action="/dashboard/mark-notification-read">
               <input type="hidden" name="notification_id" value="{{ notification.id }}">
               <button type="submit" class="mark-read-btn"><i class="fa-solid fa-check"></i> Als gelesen markieren</button>
             </form>
-          {% endif %}
+          </div>
+          <div class="notification-content">
+            {{ notification.message }}
+            {% if notification.application_id %}
+              <div class="notification-actions mt-2">
+                <a href="#app-{{ notification.application_id }}" class="btn btn-sm">Zum Antrag</a>
+              </div>
+            {% endif %}
+          </div>
         </div>
-        <div class="notification-content">
-          {{ notification.message }}
-          {% if notification.application_id %}
-            <div class="notification-actions mt-2">
-              <a href="#app-{{ notification.application_id }}" class="btn btn-sm">Zum Antrag</a>
-            </div>
-          {% endif %}
-        </div>
-      </div>
+      {% endif %}
     {% endfor %}
   </div>
 </div>
 {% endif %}
+{% endif %}
 
-<!-- Only show applications table if user is employee (not admin) -->
 {% if user.person_type != "admin" %}
 <div id="applications_table">
   <section class="table__header">
@@ -116,14 +123,20 @@
                 {%endif%}
               </td>
               <td>
-                {% if app.status != "in bearbeitung" %}
-                  <!-- Start processing button -->
+
+                {% if app.status != "in bearbeitung" and not (app.status == "abgelehnt" and app.manager_approved == False) %}
+                  <!-- Start processing button for applications that aren't rejected by manager -->
                   <form method="POST" action="/dashboard/process-loan" class="flex-center decision mb-2">
                     <input type="hidden" name="application_id" value="{{ app.id }}">
                     <button class="btn btn-secondary" type="submit">Bearbeiten</button>
                   </form>
-                  {% elif ((1 <= app.dscr and app.dscr < 2 and app.ccr < 1) or (app.dscr >= 2 and app.ccr < 0.75)) and not app.needs_manager_approval %}
-
+                {% elif app.manager_approved == False %}
+                  <!-- Manager has rejected - show message and no edit buttons -->
+                  <div class="text-sm text-danger">
+                    <i class="fa-solid fa-times-circle"></i> Von Manager abgelehnt
+                    <p class="mt-2">Dieser Antrag kann nicht mehr bearbeitet werden.</p>
+                  </div>
+                {% elif ((1 <= app.dscr and app.dscr < 2 and app.ccr < 1) or (app.dscr >= 2 and app.ccr < 0.75)) and not app.needs_manager_approval %}
                   <!-- Manager notification button for applications requiring additional security -->
                   <form method="POST" action="/dashboard/request-manager-approval" class="flex-center decision mb-2">
                     <input type="hidden" name="application_id" value="{{ app.id }}">
