@@ -147,12 +147,13 @@ def loan_submit(
         # Get decision result
         result = decision_obj.evaluate()
         logger.info(f"Loan decision: {result['decision']} - {result['reason']}")
-        
+        needs_manager_approval = result.get("needs_manager_approval", False)
         # Map decision to status
         status_mapping = {
-            "approved": "in bearbeitung",  # Start in processing, even if auto-approved
+            "pending": "in bearbeitung",
             "rejected": "abgelehnt",
-            "pending": "in bearbeitung"
+            "approved": "genehmigt",
+            
         }
         
         status = status_mapping.get(result["decision"], "in bearbeitung")
@@ -173,7 +174,8 @@ def loan_submit(
             decision=result["decision"],
             reason=result["reason"],
             created_at=now,
-            decided_at=now if status == "abgelehnt" else None  # Set decided_at for rejected applications
+            decided_at=now if status == "abgelehnt" else None,  # Set decided_at for rejected applications
+            needs_manager_approval=needs_manager_approval
         )
 
         db.add(new_app)

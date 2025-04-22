@@ -711,3 +711,76 @@ ul.status-pending {
 header a:not(.active):hover {
   color: $hover-color;
 }
+
+// Add to existing style.scss
+.notification-item {
+  background-color: #0c293c;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+.unread-notification {
+  border-left: 4px solid #ffd700;
+}
+.approval-request {
+  border-left: 4px solid #dc3545;
+}
+.mark-read-btn {
+  background: none;
+  border: none;
+  color: #ffd700;
+  cursor: pointer;
+}
+.notification-header {
+  margin-bottom: 8px;
+}
+.manager-approved {
+  color: #28a745;
+  font-weight: bold;
+}
+.manager-rejected {
+  color: #dc3545;
+  font-weight: bold;
+}
+.manager-pending {
+  color: #ffc107;
+}
+.manager-not-needed {
+  color: #6c757d;
+  font-style: italic;
+}
+.btn-warning {
+  background-color: #ffc107;
+  color: #212529;
+}
+.btn-warning:hover {
+  background-color: #e0a800;
+}
+.approval-card {
+  background-color: #0c293c;
+  border-color: #2a4158;
+  border-radius: 8px;
+}
+.approval-status {
+  background-color: #dc3545;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.8em;
+}
+.approval-detail-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  padding: 4px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+.approval-detail-label {
+  font-weight: bold;
+}
+.notes-textarea {
+  background-color: #0a1e2d;
+  border: 1px solid #2a4158;
+  border-radius: 4px;
+  color: white;
+  padding: 8px;
+}

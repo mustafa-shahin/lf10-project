@@ -16,5 +16,5 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
 def init_db():
-    from models import Person, Application, File
+    from models import Person, Application, File, Notification
     Base.metadata.create_all(bind=engine)

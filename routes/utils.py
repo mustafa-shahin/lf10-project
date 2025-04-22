@@ -19,7 +19,6 @@ sessions: Dict[str, Dict[str, Any]] = {}
 SESSION_EXPIRY_DAYS = 7
 
 def get_db():
-    """Database connection dependency"""
     db = SessionLocal()
     try:
         yield db
@@ -27,7 +26,6 @@ def get_db():
         db.close()
 
 def clean_expired_sessions():
-    """Remove expired sessions from memory"""
     now = datetime.now()
     expired_sessions = []
     

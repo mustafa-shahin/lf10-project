@@ -17,8 +17,6 @@ class EmailService:
         # Use parent directory (project root) when constructing paths
         self.root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         self.templates_dir = os.path.join(self.root_dir, "email_templates")
-        if not os.path.exists(self.templates_dir):
-            os.makedirs(self.templates_dir)
             
         # Set up Jinja2 environment for email templates
         self.env = Environment(
@@ -33,7 +31,7 @@ class EmailService:
 
     def send_email(self, to_address, subject, template_name, context=None):
         if not self.is_configured:
-            logger.error(f"Email to {to_address} not sent: SMTP not configured")
+            logger.warning(f"Email to {to_address} not sent: SMTP not configured")
             return False
             
         if context is None:
